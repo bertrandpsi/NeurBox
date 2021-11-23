@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeurBox"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
+        Title="NeurBox" Height="450" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -17,12 +17,17 @@
                 <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
             </Viewbox>
         </Border>
-        <Grid Grid.Column="1" Grid.Row="0">
+        <Grid Grid.Column="1" Grid.Row="0" x:Name="parameterGrid">
             <Grid.Resources>
                 <Style TargetType="Label">
                     <Setter Property="VerticalAlignment" Value="Center" />
+                    <Setter Property="FontWeight" Value="Bold" />
                 </Style>
                 <Style TargetType="TextBox">
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Margin" Value="5" />
+                </Style>
+                <Style TargetType="TextBlock">
                     <Setter Property="Padding" Value="5" />
                     <Setter Property="Margin" Value="5" />
                 </Style>
@@ -32,10 +37,11 @@
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -52,23 +58,26 @@
             <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
             <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
 
-            <Label Grid.Row="2" Grid.Column="0">Neuron Connections</Label>
+            <Label Grid.Row="2" Grid.Column="0">Neuron Connections:</Label>
             <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
 
-            <Label Grid.Row="3" Grid.Column="0">Internal Neurons</Label>
+            <Label Grid.Row="3" Grid.Column="0">Internal Neurons:</Label>
             <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
 
-            <Label Grid.Row="4" Grid.Column="0">Life Span</Label>
+            <Label Grid.Row="4" Grid.Column="0">Life Span:</Label>
             <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
 
-            <Label Grid.Row="5" Grid.Column="0">Generation</Label>
-            <TextBlock Grid.Row="5" Grid.Column="1" x:Name="generation"  />
-            
-            <Label Grid.Row="6" Grid.Column="0">Survival Rate</Label>
-            <TextBlock Grid.Row="6" Grid.Column="1" x:Name="survival"  />
+            <Label Grid.Row="5" Grid.Column="0">Mutation Rate:</Label>
+            <TextBox Grid.Row="5" Grid.Column="1"  Text="{Binding MutationRate}"  />
 
-            <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2">
-                <Button Content="Start" Click="Start_Click" />
+            <Label Grid.Row="6" Grid.Column="0">Generation:</Label>
+            <TextBlock Grid.Row="6" Grid.Column="1" x:Name="generation"  />
+            
+            <Label Grid.Row="7" Grid.Column="0">Survival Rate:</Label>
+            <TextBlock Grid.Row="7" Grid.Column="1" x:Name="survival"  />
+
+            <StackPanel Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button Content="Start" Click="Start_Click" x:Name="startButton" />
             </StackPanel>
         </Grid>
     </Grid>

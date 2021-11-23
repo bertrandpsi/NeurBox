@@ -27,6 +27,7 @@ namespace NeurBox
         public int GridSize { get; set; } = 100;
         public int LifeSpan { get; set; } = 300;
         public int NumberCritter { get; set; } = 100;
+        public double MutationRate { get; set; } = 0.01;
 
         public MainWindow()
         {
@@ -45,14 +46,28 @@ namespace NeurBox
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            worldGrid.Reset();
-            worldGrid.LifeSpan = LifeSpan;
-            worldGrid.InternalNeurons = InternalNeurons;
-            worldGrid.NetworkConnections = NetworkConnections;
-            worldGrid.GridSize = GridSize;
-            worldGrid.NumberCritter = NumberCritter;
-            worldGrid.Spawn();
-            worldGrid.Start();
+            if (startButton.Content.ToString() == "Stop")
+            {
+                worldGrid.Stop();
+                startButton.Content = "Start";
+                foreach (var t in parameterGrid.Children.OfType<TextBox>())
+                    t.IsEnabled = true;
+            }
+            else
+            {
+                worldGrid.LifeSpan = LifeSpan;
+                worldGrid.InternalNeurons = InternalNeurons;
+                worldGrid.NetworkConnections = NetworkConnections;
+                worldGrid.GridSize = GridSize;
+                worldGrid.NumberCritter = NumberCritter;
+                worldGrid.MutationRate = MutationRate;
+                worldGrid.Reset();
+                worldGrid.Spawn();
+                worldGrid.Start();
+                startButton.Content = "Stop";
+                foreach(var t in parameterGrid.Children.OfType<TextBox>())
+                    t.IsEnabled = false;
+            }
         }
     }
 }

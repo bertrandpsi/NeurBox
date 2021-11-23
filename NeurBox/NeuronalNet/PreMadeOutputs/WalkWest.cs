@@ -10,7 +10,7 @@ namespace NeurBox.NeuronalNet.PreMadeOutputs
     {
         public override void Execute()
         {
-            if (GetValue(0) > ActivationLimit)
+            if (GetValue(0) > WorldGrid.Random.NextDouble() * ActivationLimit)
                 Critter.MoveWest();
         }
     }

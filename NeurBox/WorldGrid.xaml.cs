@@ -45,42 +45,46 @@ namespace NeurBox
         int simulationTime = 0;
         public int Generation { get; set; } = 0;
         public double SurvivalRate { get; private set; } = 1;
+        public double MutationRate { get; internal set; }
 
         internal void Reset()
         {
             simulationTime = 0;
             Critters.Clear();
             worldCanvas.Children.Clear();
-        }
-
-        internal void Spawn()
-        {
             Grid = new int[GridSize, GridSize];
             for (int i = 0; i < GridSize; i++)
                 for (int j = 0; j < GridSize; j++)
                     Grid[i, j] = -1;
+        }
 
-            Critters = Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId =>
-              {
-                  var result = new Critter
-                  {
-                      Id = cId,
-                      MaxLifeSpan = LifeSpan,
-                      InternalNeurons = InternalNeurons,
-                      NetworkConnections = NetworkConnections,
-                      X = Random.Next(0, GridSize),
-                      Y = Random.Next(0, GridSize),
-                      GridSize = GridSize,
-                      World = this
-                  };
-                  while (Grid[result.X, result.Y] != -1)
-                  {
-                      result.X = Random.Next(0, GridSize);
-                      result.Y = Random.Next(0, GridSize);
-                  }
-                  Grid[result.X, result.Y] = result.Id;
-                  return result;
-              }).ToList();
+        internal void Stop()
+        {
+            dispatcherTimer.Stop();
+            SimulationMustRun = false;
+        }
+
+        internal void Spawn()
+        {
+            Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
+            {
+                Id = cId,
+                MaxLifeSpan = LifeSpan,
+                InternalNeurons = InternalNeurons,
+                NetworkConnections = NetworkConnections,
+                GridSize = GridSize,
+                World = this
+            }));
+
+            Critters.ForEach(c =>
+            {
+                do
+                {
+                    c.X = Random.Next(0, GridSize);
+                    c.Y = Random.Next(0, GridSize);
+                } while (Grid[c.X, c.Y] != -1);
+                Grid[c.X, c.Y] = 1;
+            });
 
             Critters.ForEach(c =>
             {
