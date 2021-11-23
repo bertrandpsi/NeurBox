@@ -77,6 +77,17 @@ namespace NeurBox
                     i++;
                 }
             }
+
+            CalculateColor();
+        }
+
+        public void CalculateColor()
+        {
+            var hash = DNA.GetHashCode();
+            var r = hash % 200 + 30;
+            var g = (hash / 200) % 200 + 30;
+            var b = (hash / (200 * 200)) % 200 + 30;
+            dot.Fill = new SolidColorBrush(Color.FromRgb((byte)r, (byte)g, (byte)b));
         }
 
         internal void MoveEast()
@@ -142,10 +153,10 @@ namespace NeurBox
 
         internal void Execute()
         {
-            foreach (var n in Neurons.Where(row => row is InputNeuron && row.IsConnected).Cast<InputNeuron>())
+            foreach (var n in Neurons.OfType<InputNeuron>().Where(row => row.IsConnected).Cast<InputNeuron>())
                 n.StoreCache();
 
-            foreach (var n in Neurons.Where(row => row is OutputNeuron && row.HasConnections).Cast<OutputNeuron>())
+            foreach (var n in Neurons.OfType<OutputNeuron>().Where(row => row.HasConnections).Cast<OutputNeuron>())
                 n.Execute();
         }
     }

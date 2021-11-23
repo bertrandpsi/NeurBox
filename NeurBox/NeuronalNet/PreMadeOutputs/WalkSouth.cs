@@ -8,10 +8,6 @@ namespace NeurBox.NeuronalNet.PreMadeOutputs
 {
     internal class WalkSouth : OutputNeuron
     {
-        public override void Execute()
-        {
-            if (GetValue(0) > WorldGrid.Random.NextDouble() * ActivationLimit)
-                Critter.MoveSouth();
-        }
+        public override void Action() => Critter.MoveSouth();
     }
 }

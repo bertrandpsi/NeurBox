@@ -14,7 +14,7 @@ namespace NeurBox.NeuronalNet
         public List<NeuronalConnection> Connections { get; set; } = new List<NeuronalConnection>();
         public List<NeuronalConnection> ChildConnections { get; set; } = new List<NeuronalConnection>();
         public bool HasConnections => Connections.Count > 0;
-        public double ActivationLimit { get; set; } = 0.5;
+        public double ActivationLimit { get; set; } = 0.8;
         public bool IsConnected => ChildConnections.Count > 0;
 
         public virtual double GetValue(int depth = 0)

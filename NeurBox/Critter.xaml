@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:NeurBox"
              mc:Ignorable="d" 
              Width="4" Height="4">
-    <Ellipse Fill="Red">
+    <Ellipse Fill="Red" x:Name="dot">
 
     </Ellipse>
 </UserControl>
