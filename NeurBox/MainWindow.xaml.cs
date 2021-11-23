@@ -20,6 +20,8 @@ namespace NeurBox
     /// </summary>
     public partial class MainWindow : Window
     {
+        System.Windows.Threading.DispatcherTimer dispatcherTimer;
+
         public int InternalNeurons { get; set; } = 2;
         public int NetworkConnections { get; set; } = 10;
         public int GridSize { get; set; } = 100;
@@ -29,6 +31,16 @@ namespace NeurBox
         public MainWindow()
         {
             InitializeComponent();
+            dispatcherTimer = new System.Windows.Threading.DispatcherTimer();
+            dispatcherTimer.Tick += dispatcherTimer_Tick;
+            dispatcherTimer.Interval = TimeSpan.FromMilliseconds(500);
+            dispatcherTimer.Start();
+        }
+
+        private void dispatcherTimer_Tick(object? sender, EventArgs e)
+        {
+            survival.Text = (worldGrid.SurvivalRate * 100).ToString("F2") + "%";
+            generation.Text = worldGrid.Generation.ToString();
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -38,7 +50,8 @@ namespace NeurBox
             worldGrid.InternalNeurons = InternalNeurons;
             worldGrid.NetworkConnections = NetworkConnections;
             worldGrid.GridSize = GridSize;
-            worldGrid.Spawn(NumberCritter);
+            worldGrid.NumberCritter = NumberCritter;
+            worldGrid.Spawn();
             worldGrid.Start();
         }
     }

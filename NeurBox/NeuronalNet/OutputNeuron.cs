@@ -9,10 +9,5 @@ namespace NeurBox.NeuronalNet
     internal abstract class OutputNeuron : Neuron
     {
         public abstract void Execute();
-
-        public override double GetValue(int depth)
-        {
-            return 0;
-        }
     }
 }

@@ -40,5 +40,7 @@ namespace NeurBox.NeuronalNet
         {
             return Connections.Any(row => row.From == neuron) || ChildConnections.Any(row => row.To == neuron);
         }
+
+        public int Position => Critter.Neurons.IndexOf(this);
     }
 }

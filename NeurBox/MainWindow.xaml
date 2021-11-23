@@ -41,6 +41,8 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
@@ -59,7 +61,13 @@
             <Label Grid.Row="4" Grid.Column="0">Life Span</Label>
             <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
 
-            <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+            <Label Grid.Row="5" Grid.Column="0">Generation</Label>
+            <TextBlock Grid.Row="5" Grid.Column="1" x:Name="generation"  />
+            
+            <Label Grid.Row="6" Grid.Column="0">Survival Rate</Label>
+            <TextBlock Grid.Row="6" Grid.Column="1" x:Name="survival"  />
+
+            <StackPanel Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2">
                 <Button Content="Start" Click="Start_Click" />
             </StackPanel>
         </Grid>

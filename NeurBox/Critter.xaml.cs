@@ -36,6 +36,9 @@ namespace NeurBox
         public int GridSize { get; internal set; }
         public int Id { get; internal set; }
         public WorldGrid World { get; set; }
+        public string DNA => InternalNeurons.ToString("X03") + " " + string.Join(" ", Neurons.SelectMany(row => row.Connections.Select(c => c.DNA)));
+        public int ConnectionsUsed => Neurons.Sum(n => n.Connections.Count);
+
         internal List<Neuron> Neurons = new List<Neuron>();
 
         static List<Type> inputs;
@@ -49,24 +52,30 @@ namespace NeurBox
 
         public void Build()
         {
-            // Creates all the neurons
-            Neurons.AddRange(inputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
-            Neurons.AddRange(outputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
-            Neurons.AddRange(Enumerable.Range(0, InternalNeurons).Select(_ => new InternalNeuron()));
-            Neurons.ForEach(n => n.Critter = this);
-
-            var nonInputs = Neurons.Skip(inputs.Count).ToList();
-            var nonOuputs = Neurons.Where(n => !(n is OutputNeuron)).ToList();
-
-            // Create all the connections
-            for (var i = 0; i < NetworkConnections; )
+            if (Neurons.Count == 0)
             {
-                var a = nonInputs[WorldGrid.Random.Next(nonInputs.Count)];
-                var b = nonOuputs[WorldGrid.Random.Next(nonOuputs.Count)];
-                if (a.AlreadyConnectedWith(b))
-                    continue;
-                a.Connect(b, WorldGrid.Random.NextDouble() * 0.8 + 0.2);
-                i++;
+                // Creates all the neurons
+                Neurons.AddRange(inputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+                Neurons.AddRange(outputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+                Neurons.AddRange(Enumerable.Range(0, InternalNeurons).Select(_ => new InternalNeuron()));
+                Neurons.ForEach(n => n.Critter = this);
+            }
+
+            if (ConnectionsUsed < NetworkConnections)
+            {
+                var nonInputs = Neurons.Skip(inputs.Count).ToList();
+                var nonOuputs = Neurons.Where(n => !(n is OutputNeuron)).ToList();
+
+                // Create all the connections
+                for (var i = ConnectionsUsed; i < NetworkConnections;)
+                {
+                    var a = nonInputs[WorldGrid.Random.Next(nonInputs.Count)];
+                    var b = nonOuputs[WorldGrid.Random.Next(nonOuputs.Count)];
+                    if (a.AlreadyConnectedWith(b))
+                        continue;
+                    a.Connect(b, WorldGrid.Random.NextDouble() * 0.8 + 0.2);
+                    i++;
+                }
             }
         }
 
@@ -102,12 +111,33 @@ namespace NeurBox
 
         internal void MoveWest()
         {
-            if (X > 0 && World.Grid[X + 1, Y] == -1)
+            if (X > 0 && World.Grid[X - 1, Y] == -1)
             {
                 World.Grid[X, Y] = -1;
                 X--;
                 World.Grid[X, Y] = Id;
             }
+        }
+
+        internal static Critter FromDNA(string dna)
+        {
+            var result = new Critter();
+            var dnaConnections = dna.Split(' ').ToList();
+            result.InternalNeurons = int.Parse(dnaConnections[0], System.Globalization.NumberStyles.HexNumber);
+
+            result.Neurons.AddRange(inputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+            result.Neurons.AddRange(outputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+            result.Neurons.AddRange(Enumerable.Range(0, result.InternalNeurons).Select(_ => new InternalNeuron()));
+            result.Neurons.ForEach(n => n.Critter = result);
+
+            foreach (var d in dnaConnections.Skip(1))
+            {
+                var idFrom = int.Parse(d.Substring(0, 3), System.Globalization.NumberStyles.HexNumber);
+                var idTo = int.Parse(d.Substring(3, 3), System.Globalization.NumberStyles.HexNumber);
+                var intensity = (((double)int.Parse(d.Substring(6, 4), System.Globalization.NumberStyles.HexNumber)) - 4000) * 4000;
+                result.Neurons[idTo].Connect(result.Neurons[idFrom], intensity);
+            }
+            return result;
         }
 
         internal void Execute()
