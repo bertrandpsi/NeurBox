@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ScottPlot.Plottable;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,13 +24,15 @@ namespace NeurBox
         System.Windows.Threading.DispatcherTimer dispatcherTimer;
 
         public int InternalNeurons { get; set; } = 2;
-        public int NetworkConnections { get; set; } = 10;
+        public int NetworkConnections { get; set; } = 6;
         public int GridSize { get; set; } = 100;
         public int LifeSpan { get; set; } = 300;
         public int NumberCritter { get; set; } = 500;
-        public double MutationRate { get; set; } = 0.05;
+        public double MutationRate { get; set; } = 0.01;
 
         private bool inRealTime = false;
+        private ScatterPlotList signalPlot;
+
         public bool InRealTime
         {
             get
@@ -50,6 +53,20 @@ namespace NeurBox
             dispatcherTimer.Tick += dispatcherTimer_Tick;
             dispatcherTimer.Interval = TimeSpan.FromMilliseconds(500);
             dispatcherTimer.Start();
+            worldGrid.GenerationSurvivalEvent += WorldGrid_GenerationSurvivalEvent;
+            signalPlot = new ScottPlot.Plottable.ScatterPlotList();
+            signalPlot.Label = "Survival Rate";
+            signalPlot.Color = System.Drawing.Color.Red;
+            survivalPlot.Plot.Legend();
+            survivalPlot.Plot.Add(signalPlot);
+            survivalPlot.Refresh();
+        }
+
+        private void WorldGrid_GenerationSurvivalEvent(object? sender, double survivalRate)
+        {
+            signalPlot.Add(worldGrid.Generation, survivalRate * 100);
+            survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
+            survivalPlot.Refresh();
         }
 
         private void dispatcherTimer_Tick(object? sender, EventArgs e)
@@ -61,6 +78,10 @@ namespace NeurBox
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            signalPlot.Clear();
+            survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
+            survivalPlot.Refresh();
+
             if (startButton.Content.ToString() == "Stop")
             {
                 worldGrid.Stop();

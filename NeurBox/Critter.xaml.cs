@@ -73,7 +73,7 @@ namespace NeurBox
                     var b = nonOuputs[WorldGrid.Random.Next(nonOuputs.Count)];
                     if (a.AlreadyConnectedWith(b))
                         continue;
-                    a.Connect(b, WorldGrid.Random.NextDouble() * 0.8 + 0.2);
+                    a.Connect(b, WorldGrid.Random.NextDouble() * 1.6 - 0.2);
                     i++;
                 }
             }

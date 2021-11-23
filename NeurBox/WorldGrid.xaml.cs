@@ -27,6 +27,8 @@ namespace NeurBox
         Thread? simulationRunner;
         bool SimulationMustRun = true;
 
+        public event EventHandler<double> GenerationSurvivalEvent;
+
         public WorldGrid()
         {
             InitializeComponent();
@@ -192,8 +194,15 @@ namespace NeurBox
 
         private List<string> SelectionCriteria()
         {
-            Critters.RemoveAll(row => row.X < 70);
+            Critters.RemoveAll(row =>
+            {
+                var a = 50 - row.X;
+                var b = 50 - row.Y;
+                var d=Math.Sqrt(b * b + a * a);
+                return (d > 30);
+            } );
             SurvivalRate = (double)Critters.Count / (double)NumberCritter;
+            GenerationSurvivalEvent?.Invoke(this, SurvivalRate);
             var dnas = Critters.Select(row => row.DNA).ToList();
             return dnas;
         }

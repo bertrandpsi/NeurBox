@@ -21,7 +21,7 @@ namespace NeurBox.NeuronalNet
         {
             if (depth >= MaxDepth)
                 return 0;
-            return InRange(Connections.Sum(row => row.From.GetValue(depth + 1) * row.Intensity));
+            return InRange(Connections.Sum(row => row.From.GetValue(depth + 1) * row.Intensity) / (Connections.Count / 2.0));
         }
 
         private double InRange(double source)

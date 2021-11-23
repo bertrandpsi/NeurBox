@@ -5,13 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeurBox"
         mc:Ignorable="d"
-        Title="NeurBox" Height="450" Width="800"
+        Title="NeurBox" Height="800" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="250"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <WpfPlot Name="survivalPlot" Grid.Row="1" Grid.ColumnSpan="2" />
         <Border Padding="5" Grid.Column="0" Grid.Row="0">
             <Viewbox Stretch="Uniform" VerticalAlignment="Top">
                 <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
@@ -77,7 +82,7 @@
 
             <Label Grid.Row="7" Grid.Column="0">Generation:</Label>
             <TextBlock Grid.Row="7" Grid.Column="1" x:Name="generation"  />
-            
+
             <Label Grid.Row="8" Grid.Column="0">Survival Rate:</Label>
             <TextBlock Grid.Row="8" Grid.Column="1" x:Name="survival"  />
 
