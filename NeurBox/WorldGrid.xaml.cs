@@ -45,6 +45,7 @@ namespace NeurBox
         public int GridSize { get; internal set; }
         public int NumberCritter { get; set; }
         List<Critter> Critters { get; set; } = new List<Critter>();
+        public Predicate<Critter> SelectionFunction;
 
         public int[,] Grid;
         int simulationTime = 0;
@@ -194,13 +195,14 @@ namespace NeurBox
 
         private List<string> SelectionCriteria()
         {
-            Critters.RemoveAll(row =>
+            /*Critters.RemoveAll(row =>
             {
                 var a = 50 - row.X;
                 var b = 50 - row.Y;
                 var d=Math.Sqrt(b * b + a * a);
                 return (d > 30);
-            } );
+            } );*/
+            Critters.RemoveAll(SelectionFunction);
             SurvivalRate = (double)Critters.Count / (double)NumberCritter;
             GenerationSurvivalEvent?.Invoke(this, SurvivalRate);
             var dnas = Critters.Select(row => row.DNA).ToList();

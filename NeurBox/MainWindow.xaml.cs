@@ -1,4 +1,5 @@
-﻿using ScottPlot.Plottable;
+﻿using CSScriptLib;
+using ScottPlot.Plottable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +33,11 @@ namespace NeurBox
 
         private bool inRealTime = false;
         private ScatterPlotList signalPlot;
+
+        public string SelectionCondition { get; set; } = @"var a = 50 - critter.X;
+var b = 50 - critter.Y;
+var d=Math.Sqrt(b * b + a * a);
+return (d > 30);";
 
         public bool InRealTime
         {
@@ -78,6 +84,12 @@ namespace NeurBox
 
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            //https://github.com/oleg-shilo/cs-script/wiki
+            dynamic script = CSScript.Evaluator.LoadMethod(@"
+public bool Evaluate(NeurBox.Critter critter)
+{" + SelectionCondition + @"}");
+            worldGrid.SelectionFunction = (critter) => script.Evaluate(critter);            
+
             signalPlot.Clear();
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
             survivalPlot.Refresh();
