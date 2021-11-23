@@ -26,8 +26,22 @@ namespace NeurBox
         public int NetworkConnections { get; set; } = 10;
         public int GridSize { get; set; } = 100;
         public int LifeSpan { get; set; } = 300;
-        public int NumberCritter { get; set; } = 100;
-        public double MutationRate { get; set; } = 0.01;
+        public int NumberCritter { get; set; } = 500;
+        public double MutationRate { get; set; } = 0.05;
+
+        private bool inRealTime = false;
+        public bool InRealTime
+        {
+            get
+            {
+                return inRealTime;
+            }
+            set
+            {
+                inRealTime = value;
+                worldGrid.InRealTime = value;
+            }
+        }
 
         public MainWindow()
         {
@@ -42,6 +56,7 @@ namespace NeurBox
         {
             survival.Text = (worldGrid.SurvivalRate * 100).ToString("F2") + "%";
             generation.Text = worldGrid.Generation.ToString();
+            timePerGeneration.Text = worldGrid.TimePerGeneration.ToString();
         }
 
         private void Start_Click(object sender, RoutedEventArgs e)
@@ -65,7 +80,7 @@ namespace NeurBox
                 worldGrid.Spawn();
                 worldGrid.Start();
                 startButton.Content = "Stop";
-                foreach(var t in parameterGrid.Children.OfType<TextBox>())
+                foreach (var t in parameterGrid.Children.OfType<TextBox>())
                     t.IsEnabled = false;
             }
         }

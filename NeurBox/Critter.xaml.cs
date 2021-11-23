@@ -92,45 +92,57 @@ namespace NeurBox
 
         internal void MoveEast()
         {
-            if (X < World.GridSize - 1 && World.Grid[X + 1, Y] == -1)
+            lock (World.Grid)
             {
-                World.Grid[X, Y] = -1;
-                X++;
-                World.Grid[X, Y] = Id;
+                if (X < World.GridSize - 1 && World.Grid[X + 1, Y] == -1)
+                {
+                    World.Grid[X, Y] = -1;
+                    X++;
+                    World.Grid[X, Y] = Id;
+                }
             }
         }
 
         internal void MoveNorth()
         {
-            if (Y > 0 && World.Grid[X, Y - 1] == -1)
+            lock (World.Grid)
             {
-                World.Grid[X, Y] = -1;
-                Y--;
-                World.Grid[X, Y] = Id;
+                if (Y > 0 && World.Grid[X, Y - 1] == -1)
+                {
+                    World.Grid[X, Y] = -1;
+                    Y--;
+                    World.Grid[X, Y] = Id;
+                }
             }
         }
 
         internal void MoveSouth()
         {
-            if (Y < World.GridSize - 1 && World.Grid[X, Y + 1] == -1)
+            lock (World.Grid)
             {
-                World.Grid[X, Y] = -1;
-                Y++;
-                World.Grid[X, Y] = Id;
+                if (Y < World.GridSize - 1 && World.Grid[X, Y + 1] == -1)
+                {
+                    World.Grid[X, Y] = -1;
+                    Y++;
+                    World.Grid[X, Y] = Id;
+                }
             }
         }
 
         internal void MoveWest()
         {
-            if (X > 0 && World.Grid[X - 1, Y] == -1)
+            lock (World.Grid)
             {
-                World.Grid[X, Y] = -1;
-                X--;
-                World.Grid[X, Y] = Id;
+                if (X > 0 && World.Grid[X - 1, Y] == -1)
+                {
+                    World.Grid[X, Y] = -1;
+                    X--;
+                    World.Grid[X, Y] = Id;
+                }
             }
         }
 
-        internal static Critter FromDNA(string dna)
+        internal static Critter FromDNA(string dna, double mutationRate)
         {
             var result = new Critter();
             var dnaConnections = dna.Split(' ').ToList();
@@ -143,9 +155,14 @@ namespace NeurBox
 
             foreach (var d in dnaConnections.Skip(1))
             {
+                if (WorldGrid.Random.NextDouble() < mutationRate) // We skip this connection (a random one will be created instead)
+                    continue;
                 var idFrom = int.Parse(d.Substring(0, 3), System.Globalization.NumberStyles.HexNumber);
                 var idTo = int.Parse(d.Substring(3, 3), System.Globalization.NumberStyles.HexNumber);
                 var intensity = (((double)int.Parse(d.Substring(6, 4), System.Globalization.NumberStyles.HexNumber)) - 4000) / 4000.0;
+                var intensityChanger = WorldGrid.Random.NextDouble() * mutationRate;
+                intensityChanger = 1 + (intensityChanger * 2 - intensityChanger);
+                intensity *= intensityChanger;
                 result.Neurons[idTo].Connect(result.Neurons[idFrom], intensity);
             }
             return result;
@@ -153,6 +170,8 @@ namespace NeurBox
 
         internal void Execute()
         {
+            LifeSpan++;
+
             foreach (var n in Neurons.OfType<InputNeuron>().Where(row => row.IsConnected).Cast<InputNeuron>())
                 n.StoreCache();
 

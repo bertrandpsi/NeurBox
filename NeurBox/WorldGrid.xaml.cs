@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -23,7 +24,7 @@ namespace NeurBox
     {
         public static Random Random = new Random();
         System.Windows.Threading.DispatcherTimer dispatcherTimer;
-        Thread simulationRunner;
+        Thread? simulationRunner;
         bool SimulationMustRun = true;
 
         public WorldGrid()
@@ -33,6 +34,8 @@ namespace NeurBox
             dispatcherTimer.Tick += dispatcherTimer_Tick;
             dispatcherTimer.Interval = TimeSpan.FromMilliseconds(20);
         }
+
+        public bool InRealTime { get; set; }
 
         public int LifeSpan { get; set; }
         public int InternalNeurons { get; set; }
@@ -46,6 +49,8 @@ namespace NeurBox
         public int Generation { get; set; } = 0;
         public double SurvivalRate { get; private set; } = 1;
         public double MutationRate { get; internal set; }
+        public Stopwatch TimeWatch { get; private set; }
+        public TimeSpan TimePerGeneration { get; private set; }
 
         internal void Reset()
         {
@@ -60,12 +65,16 @@ namespace NeurBox
 
         internal void Stop()
         {
-            dispatcherTimer.Stop();
             SimulationMustRun = false;
+            while (simulationRunner != null)
+                Thread.Sleep(100);
+            TimeWatch.Stop();
+            dispatcherTimer.Stop();
         }
 
         internal void Spawn()
         {
+            // Generate some random Critter
             Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
             {
                 Id = cId,
@@ -76,6 +85,7 @@ namespace NeurBox
                 World = this
             }));
 
+            // Place the critter on the world map
             Critters.ForEach(c =>
             {
                 do
@@ -84,14 +94,15 @@ namespace NeurBox
                     c.Y = Random.Next(0, GridSize);
                 } while (Grid[c.X, c.Y] != -1);
                 Grid[c.X, c.Y] = 1;
+                c.Build();
             });
 
+            // Place the critter on the screen
             Critters.ForEach(c =>
             {
                 worldCanvas.Children.Add(c);
                 c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
                 c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
-                c.Build();
             });
         }
 
@@ -99,40 +110,48 @@ namespace NeurBox
         {
             while (SimulationMustRun)
             {
-                LogicLoop();
-                simulationTime++;
+                if (InRealTime)
                 {
-                    if (simulationTime >= LifeSpan)
+                    Thread.Sleep(10);
+                    continue;
+                }
+
+                ParallelLogicLoop();
+                if (!SimulationMustRun)
+                    break;
+                simulationTime++;
+                if (simulationTime >= LifeSpan)
+                {
+                    this.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        this.Dispatcher.BeginInvoke(new Action(() =>
-                        {
-                            NextGeneration();
-                        }));
-                        break;
-                    }
+                        NextGeneration();
+                    }));
+                    simulationTime = 0;
                 }
             }
+            simulationRunner = null;
         }
 
         internal void LogicLoop()
         {
             lock (Critters)
-            {
-                Critters.ForEach(c =>
-                {
-                    c.LifeSpan++;
-                    c.Execute();
-                });
-            }
+                Critters.ForEach(c => c.Execute());
         }
+
+        internal void ParallelLogicLoop()
+        {
+            lock (Critters)
+                Parallel.ForEach(Critters, c => c.Execute());
+        }
+
         private void dispatcherTimer_Tick(object? sender, EventArgs e)
         {
-            LogicLoop();
-            simulationTime++;
-            if (simulationTime >= LifeSpan)
+            if (InRealTime)
             {
-                NextGeneration();
-                return;
+                LogicLoop();
+                simulationTime++;
+                if (simulationTime >= LifeSpan)
+                    NextGeneration();
             }
 
             lock (Critters)
@@ -147,24 +166,28 @@ namespace NeurBox
 
         private void NextGeneration()
         {
-            var dnas = SelectionCriteria();
-
-            Reset();
-
-            if (dnas.Count > 0)
-                Critters.AddRange(Enumerable.Range(0, NumberCritter).Select(_ => Critter.FromDNA(dnas[Random.Next(0, dnas.Count)])));
-            Critters.ForEach(c =>
-            {
-                c.MaxLifeSpan = LifeSpan;
-                c.InternalNeurons = InternalNeurons;
-                c.NetworkConnections = NetworkConnections;
-                c.X = Random.Next(0, GridSize);
-                c.Y = Random.Next(0, GridSize);
-                c.GridSize = GridSize;
-                c.World = this;
-            });
-            Spawn();
             Generation++;
+            TimePerGeneration = TimeWatch.Elapsed / Generation;
+            lock (Critters)
+            {
+                var dnas = SelectionCriteria();
+
+                Reset();
+
+                if (dnas.Count > 0)
+                    Critters.AddRange(Enumerable.Range(0, NumberCritter).Select(_ => Critter.FromDNA(dnas[Random.Next(0, dnas.Count)], MutationRate)));
+                Critters.ForEach(c =>
+                {
+                    c.MaxLifeSpan = LifeSpan;
+                    c.InternalNeurons = InternalNeurons;
+                    c.NetworkConnections = NetworkConnections;
+                    c.X = Random.Next(0, GridSize);
+                    c.Y = Random.Next(0, GridSize);
+                    c.GridSize = GridSize;
+                    c.World = this;
+                });
+                Spawn();
+            }
         }
 
         private List<string> SelectionCriteria()
@@ -177,10 +200,19 @@ namespace NeurBox
 
         internal void Start()
         {
+            while (simulationRunner != null)
+                Thread.Sleep(10);
+
             simulationTime = 0;
-            /*simulationRunner = new Thread(SimulationThread);
+            Generation = 0;
+            SimulationMustRun = true;
+
+            TimeWatch = new Stopwatch();
+            TimeWatch.Start();
+
+            simulationRunner = new Thread(SimulationThread);
             simulationRunner.IsBackground = true;
-            simulationRunner.Start();*/
+            simulationRunner.Start();
             dispatcherTimer.Start();
         }
     }
