@@ -134,7 +134,7 @@ namespace NeurBox
             {
                 var idFrom = int.Parse(d.Substring(0, 3), System.Globalization.NumberStyles.HexNumber);
                 var idTo = int.Parse(d.Substring(3, 3), System.Globalization.NumberStyles.HexNumber);
-                var intensity = (((double)int.Parse(d.Substring(6, 4), System.Globalization.NumberStyles.HexNumber)) - 4000) * 4000;
+                var intensity = (((double)int.Parse(d.Substring(6, 4), System.Globalization.NumberStyles.HexNumber)) - 4000) / 4000.0;
                 result.Neurons[idTo].Connect(result.Neurons[idFrom], intensity);
             }
             return result;
