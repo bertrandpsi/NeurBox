@@ -1,0 +1,67 @@
+﻿<Window x:Class="NeurBox.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NeurBox"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="250"/>
+        </Grid.ColumnDefinitions>
+        <Border Padding="5" Grid.Column="0" Grid.Row="0">
+            <Viewbox Stretch="Uniform" VerticalAlignment="Top">
+                <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
+            </Viewbox>
+        </Border>
+        <Grid Grid.Column="1" Grid.Row="0">
+            <Grid.Resources>
+                <Style TargetType="Label">
+                    <Setter Property="VerticalAlignment" Value="Center" />
+                </Style>
+                <Style TargetType="TextBox">
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Margin" Value="5" />
+                </Style>
+                <Style TargetType="Button">
+                    <Setter Property="Padding" Value="5" />
+                    <Setter Property="Margin" Value="5" />
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="100" />
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Grid.Column="0">Grid Size:</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding GridSize}" />
+
+            <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
+
+            <Label Grid.Row="2" Grid.Column="0">Neuron Connections</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
+
+            <Label Grid.Row="3" Grid.Column="0">Internal Neurons</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
+
+            <Label Grid.Row="4" Grid.Column="0">Life Span</Label>
+            <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
+
+            <StackPanel Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+                <Button Content="Start" Click="Start_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
