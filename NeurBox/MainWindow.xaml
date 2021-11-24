@@ -7,116 +7,133 @@
         mc:Ignorable="d"
         Title="NeurBox" Height="800" Width="800"
         DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    <TabControl>
-        <TabItem Header="Simulation">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="250"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                </Grid.RowDefinitions>
-                <WpfPlot Name="survivalPlot" Grid.Row="1" Grid.ColumnSpan="2" />
-                <Border Padding="5" Grid.Column="0" Grid.Row="0">
-                    <Viewbox Stretch="Uniform" VerticalAlignment="Top">
-                        <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
-                    </Viewbox>
-                </Border>
-                <ScrollViewer Grid.Column="1" Grid.Row="0">
-                    <Grid x:Name="parameterGrid">
-                        <Grid.Resources>
-                            <Style TargetType="Label">
-                                <Setter Property="VerticalAlignment" Value="Center" />
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Style>
-                            <Style TargetType="TextBox">
-                                <Setter Property="Padding" Value="5" />
-                                <Setter Property="Margin" Value="5" />
-                            </Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Padding" Value="5" />
-                                <Setter Property="Margin" Value="5" />
-                            </Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Padding" Value="5" />
-                                <Setter Property="Margin" Value="5" />
-                            </Style>
-                        </Grid.Resources>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*"/>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0">Grid Size:</Label>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding GridSize}" />
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ToolBar Grid.Row="0">
+            <Button Click="Start_Click" x:Name="toolRun">
+                <Label>Run</Label>
+            </Button>
+        </ToolBar>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Simulation">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="250"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <WpfPlot Name="survivalPlot" Grid.Row="1" Grid.ColumnSpan="2" />
+                    <Border Padding="5" Grid.Column="0" Grid.Row="0">
+                        <Viewbox Stretch="Uniform" VerticalAlignment="Top">
+                            <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
+                        </Viewbox>
+                    </Border>
+                    <ScrollViewer Grid.Column="1" Grid.Row="0">
+                        <Grid x:Name="parameterGrid">
+                            <Grid.Resources>
+                                <Style TargetType="Label">
+                                    <Setter Property="VerticalAlignment" Value="Center" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </Style>
+                                <Style TargetType="TextBox">
+                                    <Setter Property="Padding" Value="5" />
+                                    <Setter Property="Margin" Value="5" />
+                                </Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Padding" Value="5" />
+                                    <Setter Property="Margin" Value="5" />
+                                </Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Padding" Value="5" />
+                                    <Setter Property="Margin" Value="5" />
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Label Grid.Row="0" Grid.Column="0">Grid Size:</Label>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding GridSize}" />
 
-                        <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
-                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
+                            <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
+                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
 
-                        <Label Grid.Row="2" Grid.Column="0">Neuron Connections:</Label>
-                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
+                            <Label Grid.Row="2" Grid.Column="0">Neuron Connections:</Label>
+                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
 
-                        <Label Grid.Row="3" Grid.Column="0">Internal Neurons:</Label>
-                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
+                            <Label Grid.Row="3" Grid.Column="0">Internal Neurons:</Label>
+                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
 
-                        <Label Grid.Row="4" Grid.Column="0">Life Span:</Label>
-                        <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
+                            <Label Grid.Row="4" Grid.Column="0">Life Span:</Label>
+                            <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
 
-                        <Label Grid.Row="5" Grid.Column="0">Mutation Rate:</Label>
-                        <TextBox Grid.Row="5" Grid.Column="1"  Text="{Binding MutationRate}"  />
+                            <Label Grid.Row="5" Grid.Column="0">Mutation Rate:</Label>
+                            <TextBox Grid.Row="5" Grid.Column="1"  Text="{Binding MutationRate}"  />
 
-                        <Label Grid.Row="6" Grid.Column="0">Realtime:</Label>
-                        <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding InRealTime}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"  />
+                            <Label Grid.Row="6" Grid.Column="0">Realtime:</Label>
+                            <CheckBox Grid.Row="6" Grid.Column="1" IsChecked="{Binding InRealTime}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"  />
 
-                        <Label Grid.Row="7" Grid.Column="0">Generation:</Label>
-                        <TextBlock Grid.Row="7" Grid.Column="1" x:Name="generation"  />
+                            <Label Grid.Row="7" Grid.Column="0">Generation:</Label>
+                            <TextBlock Grid.Row="7" Grid.Column="1" x:Name="generation"  />
 
-                        <Label Grid.Row="8" Grid.Column="0">Survival Rate:</Label>
-                        <TextBlock Grid.Row="8" Grid.Column="1" x:Name="survival"  />
+                            <Label Grid.Row="8" Grid.Column="0">Survival Rate:</Label>
+                            <TextBlock Grid.Row="8" Grid.Column="1" x:Name="survival"  />
 
-                        <Label Grid.Row="9" Grid.Column="0">Time Per Generation:</Label>
-                        <TextBlock Grid.Row="9" Grid.Column="1" x:Name="timePerGeneration"  />
+                            <Label Grid.Row="9" Grid.Column="0">Time Per Generation:</Label>
+                            <TextBlock Grid.Row="9" Grid.Column="1" x:Name="timePerGeneration"  />
 
-                        <StackPanel Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
-                            <Button Content="Start" Click="Start_Click" x:Name="startButton" />
-                        </StackPanel>
-                    </Grid>
+                            <StackPanel Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="2">
+                                <Button Content="Start" Click="Start_Click" x:Name="startButton" />
+                            </StackPanel>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Scripting">
+                <ScrollViewer>
+                    <ScrollViewer.Resources>
+                        <Style TargetType="Label">
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Padding" Value="5" />
+                            <Setter Property="Margin" Value="5" />
+                            <Setter Property="Height" Value="150" />
+                        </Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Padding" Value="5" />
+                            <Setter Property="Background" Value="WhiteSmoke" />
+                            <Setter Property="Margin" Value="5" />
+                        </Style>
+                    </ScrollViewer.Resources>
+                    <StackPanel>
+                        <TextBlock TextWrapping="Wrap" TextAlignment="Justify">The following function must return True if the critter can reproduce its DNA, otherwise it will be eliminated. The code is written in C#. The critter object contains an X and Y property.</TextBlock>
+                        <Label>Survival Selection Function:</Label>
+                        <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Text="{Binding SelectionCondition}"/>
+                    </StackPanel>
                 </ScrollViewer>
-            </Grid>
-        </TabItem>
-        <TabItem Header="Scripting">
-            <ScrollViewer>
-                <ScrollViewer.Resources>
-                    <Style TargetType="Label">
-                        <Setter Property="VerticalAlignment" Value="Center" />
-                        <Setter Property="FontWeight" Value="Bold" />
-                    </Style>
-                    <Style TargetType="TextBox">
-                        <Setter Property="Padding" Value="5" />
-                        <Setter Property="Margin" Value="5" />
-                        <Setter Property="Height" Value="150" />
-                    </Style>
-                </ScrollViewer.Resources>
-                <StackPanel>
-                    <Label>Selection:</Label>
-                    <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Text="{Binding SelectionCondition}"/>
-                </StackPanel>
-            </ScrollViewer>
-        </TabItem>
-    </TabControl>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </Window>

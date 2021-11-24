@@ -173,6 +173,12 @@ namespace NeurBox
             TimePerGeneration = TimeWatch.Elapsed / Generation;
             lock (Critters)
             {
+                Critters.ForEach(c =>
+                {
+                    c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                    c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                });
+
                 var dnas = SelectionCriteria();
 
                 Reset();

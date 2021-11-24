@@ -37,7 +37,7 @@ namespace NeurBox
         public string SelectionCondition { get; set; } = @"var a = 50 - critter.X;
 var b = 50 - critter.Y;
 var d=Math.Sqrt(b * b + a * a);
-return (d > 30);";
+return (d < 30);";
 
         public bool InRealTime
         {
@@ -82,13 +82,30 @@ return (d > 30);";
             timePerGeneration.Text = worldGrid.TimePerGeneration.ToString();
         }
 
+        WeakReference weakReference = null;
         private void Start_Click(object sender, RoutedEventArgs e)
         {
-            //https://github.com/oleg-shilo/cs-script/wiki
-            dynamic script = CSScript.Evaluator.LoadMethod(@"
-public bool Evaluate(NeurBox.Critter critter)
-{" + SelectionCondition + @"}");
-            worldGrid.SelectionFunction = (critter) => script.Evaluate(critter);            
+            // Unload the previous weakReference
+            if(weakReference != null)
+            {
+                worldGrid.SelectionFunction = null;
+                CSParsing.UnloadAssembly(weakReference);
+                weakReference = null;
+            }
+
+            weakReference = CSParsing.LoadAndExecute(@"using NeurBox;
+using System;
+public static class EvalClass
+{
+    public static bool EvalFunction(Critter critter)
+{
+" + SelectionCondition + @"
+}
+}
+");
+            var assembly = ((SimpleUnloadableAssemblyLoadContext)weakReference.Target).Assemblies.First();
+            var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            worldGrid.SelectionFunction = (critter) => !(bool)method.Invoke(null, new object[] { critter });
 
             signalPlot.Clear();
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
@@ -98,6 +115,7 @@ public bool Evaluate(NeurBox.Critter critter)
             {
                 worldGrid.Stop();
                 startButton.Content = "Start";
+                ((Label)toolRun.Content).Content = "Run";
                 foreach (var t in parameterGrid.Children.OfType<TextBox>())
                     t.IsEnabled = true;
             }
@@ -113,6 +131,7 @@ public bool Evaluate(NeurBox.Critter critter)
                 worldGrid.Spawn();
                 worldGrid.Start();
                 startButton.Content = "Stop";
+                ((Label)toolRun.Content).Content = "Stop";
                 foreach (var t in parameterGrid.Children.OfType<TextBox>())
                     t.IsEnabled = false;
             }
