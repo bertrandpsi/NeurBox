@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +23,8 @@ namespace NeurBox
     /// </summary>
     public partial class Critter : UserControl
     {
+        static SemaphoreSlim gridMovement = new SemaphoreSlim(1);
+
         public Critter()
         {
             InitializeComponent();
@@ -128,54 +131,50 @@ namespace NeurBox
 
         internal void MoveEast()
         {
-            lock (World.Grid)
+            gridMovement.Wait();
+            if (X < World.GridSize - 1 && World.Grid[X + 1, Y] == -1)
             {
-                if (X < World.GridSize - 1 && World.Grid[X + 1, Y] == -1)
-                {
-                    World.Grid[X, Y] = -1;
-                    X++;
-                    World.Grid[X, Y] = Id;
-                }
+                World.Grid[X, Y] = -1;
+                X++;
+                World.Grid[X, Y] = Id;
             }
+            gridMovement.Release();
         }
 
         internal void MoveNorth()
         {
-            lock (World.Grid)
+            gridMovement.Wait();
+            if (Y > 0 && World.Grid[X, Y - 1] == -1)
             {
-                if (Y > 0 && World.Grid[X, Y - 1] == -1)
-                {
-                    World.Grid[X, Y] = -1;
-                    Y--;
-                    World.Grid[X, Y] = Id;
-                }
+                World.Grid[X, Y] = -1;
+                Y--;
+                World.Grid[X, Y] = Id;
             }
+            gridMovement.Release();
         }
 
         internal void MoveSouth()
         {
-            lock (World.Grid)
+            gridMovement.Wait();
+            if (Y < World.GridSize - 1 && World.Grid[X, Y + 1] == -1)
             {
-                if (Y < World.GridSize - 1 && World.Grid[X, Y + 1] == -1)
-                {
-                    World.Grid[X, Y] = -1;
-                    Y++;
-                    World.Grid[X, Y] = Id;
-                }
+                World.Grid[X, Y] = -1;
+                Y++;
+                World.Grid[X, Y] = Id;
             }
+            gridMovement.Release();
         }
 
         internal void MoveWest()
         {
-            lock (World.Grid)
+            gridMovement.Wait();
+            if (X > 0 && World.Grid[X - 1, Y] == -1)
             {
-                if (X > 0 && World.Grid[X - 1, Y] == -1)
-                {
-                    World.Grid[X, Y] = -1;
-                    X--;
-                    World.Grid[X, Y] = Id;
-                }
+                World.Grid[X, Y] = -1;
+                X--;
+                World.Grid[X, Y] = Id;
             }
+            gridMovement.Release();
         }
 
         internal static Critter FromDNA(string dna, double mutationRate)
