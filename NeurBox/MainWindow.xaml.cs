@@ -1,8 +1,10 @@
-﻿using ScottPlot.Plottable;
+﻿using NeurBox.NeuronalNet;
+using ScottPlot.Plottable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,8 +30,8 @@ namespace NeurBox
         public int GridSize { get; set; } = 100;
         public int LifeSpan { get; set; } = 300;
         public int NumberCritter { get; set; } = 500;
-        public double MutationRate { get; set; } = 0.01;
-        public double MinReproductionFactor { get; set; } = 0.8;
+        public double MutationRate { get; set; } = 0.005;
+        public double MinReproductionFactor { get; set; } = 0.9;
 
         private ScatterPlotList signalPlot;
 
@@ -56,7 +58,7 @@ namespace NeurBox
 var a = 50 - critter.X;
 var b = 50 - critter.Y;
 var d=Math.Sqrt(b * b + a * a);
-return (d < 30);";
+return (d < 20);";
 
         public bool DnaMixing { get; set; } = true;
 
@@ -89,14 +91,11 @@ return (d < 30);";
             survivalPlot.Plot.Add(signalPlot);
             survivalPlot.Refresh();
 
+            // Pre-run the code parsing to speed up on run
             var w = CSParsing.LoadAndExecute(@"using NeurBox; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
             var assembly = ((SimpleUnloadableAssemblyLoadContext)w.Target).Assemblies.First();
             var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if (!(bool)method.Invoke(null, new object[] { null }))
-            {
-
-            }
-            //CSParsing.UnloadAssembly(w);
+            method.Invoke(null, new object[] { null });
         }
 
         private void WorldGrid_GenerationSurvivalEvent(object? sender, double survivalRate)
@@ -114,6 +113,96 @@ return (d < 30);";
             timePerGeneration.Text = worldGrid.TimePerGeneration.ToString(@"hh\:mm\:ss\.ff");
             statusTimePerGeneration.Text = "Time: " + timePerGeneration.Text;
             geneticSimilarities.Text = (worldGrid.DNASimilarity * 100).ToString("F2") + "%";
+
+            networkPreview.Children.Clear();
+            var pos = 0;
+            foreach (var t in worldGrid.TopMostUsed.ToList())
+            {
+                var title = new TextBlock { Text = "Position " + (pos + 1), Width = double.NaN, TextAlignment = TextAlignment.Left, FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(20) };
+                networkPreview.Children.Add(title);
+                networkPreview.Children.Add(DrawNeuronalNet(t));
+                pos++;
+            }
+        }
+
+        private Canvas DrawNeuronalNet(Critter critter)
+        {
+            var canvas = new Canvas { Height = 300 };
+            var pos = new int[] { 10, 10, 10 };
+            var visitedNode = new List<Neuron>();
+            var toVisit = new Queue<Neuron>();
+
+            // All the output nodes
+            var usedOutputs = critter.Neurons.OfType<OutputNeuron>().Where(row => row.HasConnections);
+            toVisit = new Queue<Neuron>(usedOutputs);
+            visitedNode.AddRange(usedOutputs);
+            var connections = new List<NeuronalConnection>();
+            var neuronLookup = new Dictionary<Neuron, Grid>();
+
+            // Draw all the neurons
+            while (toVisit.Count > 0)
+            {
+                var n = toVisit.Dequeue();
+
+                var g = new Grid();
+                neuronLookup.Add(n, g);
+                var e = new Ellipse();
+                g.Children.Add(e);
+                var t = new TextBlock { Text = TypeTitle(n) };
+                g.Children.Add(t);
+                canvas.Children.Add(g);
+                if (n is OutputNeuron)
+                {
+                    g.SetValue(Canvas.LeftProperty, (double)pos[2]);
+                    g.SetValue(Canvas.TopProperty, (double)220);
+                    pos[2] += 110;
+                }
+                else if (n is InputNeuron)
+                {
+                    g.SetValue(Canvas.LeftProperty, (double)pos[0]);
+                    g.SetValue(Canvas.TopProperty, (double)10);
+                    pos[0] += 110;
+                }
+                else
+                {
+                    g.SetValue(Canvas.LeftProperty, (double)pos[1]);
+                    g.SetValue(Canvas.TopProperty, (double)110);
+                    pos[1] += 110;
+                }
+                foreach (var c in n.Connections)
+                {
+                    connections.Add(c);
+                    if (visitedNode.Contains(c.From))
+                        continue;
+                    visitedNode.Add(c.From);
+                    toVisit.Enqueue(c.From);
+                }
+            }
+
+            // Draw all the connections
+            foreach (var c in connections)
+            {
+                if (c.From == c.To)
+                    continue;
+                if (!neuronLookup.ContainsKey(c.From) || !neuronLookup.ContainsKey(c.To))
+                    continue;
+                var l = new Line();
+                l.X1 = (double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 35.0;
+                l.Y1 = (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0;
+                l.X2 = (double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 35.0;
+                l.Y2 = (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 35.0;
+                l.StrokeThickness = Math.Max(0.5, Math.Abs(c.Intensity) * 3);
+                l.Stroke = c.Intensity < 0 ? Brushes.Red : Brushes.Green;
+                canvas.Children.Insert(0, l);
+            }
+
+            return canvas;
+        }
+
+        private string TypeTitle(object o)
+        {
+            var exp = new Regex("([a-z])([A-Z])");
+            return exp.Replace(o.GetType().Name, "$1 $2");
         }
 
         private void HandleLinkClick(object sender, RoutedEventArgs e)
