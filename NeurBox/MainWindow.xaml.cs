@@ -155,18 +155,21 @@ return (d < 20);";
                 {
                     g.SetValue(Canvas.LeftProperty, (double)pos[2]);
                     g.SetValue(Canvas.TopProperty, (double)220);
+                    e.Fill=new SolidColorBrush(Colors.LightCoral);
                     pos[2] += 110;
                 }
                 else if (n is InputNeuron)
                 {
                     g.SetValue(Canvas.LeftProperty, (double)pos[0]);
                     g.SetValue(Canvas.TopProperty, (double)10);
+                    e.Fill = new SolidColorBrush(Colors.SkyBlue);
                     pos[0] += 110;
                 }
                 else
                 {
                     g.SetValue(Canvas.LeftProperty, (double)pos[1]);
                     g.SetValue(Canvas.TopProperty, (double)110);
+                    e.Fill=new SolidColorBrush(Colors.LightSteelBlue);
                     pos[1] += 110;
                 }
                 foreach (var c in n.Connections)
@@ -182,19 +185,44 @@ return (d < 20);";
             // Draw all the connections
             foreach (var c in connections)
             {
-                if (c.From == c.To)
-                    continue;
                 if (!neuronLookup.ContainsKey(c.From) || !neuronLookup.ContainsKey(c.To))
                     continue;
-                var l = new Line();
-                l.X1 = (double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 35.0;
-                l.Y1 = (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0;
-                l.X2 = (double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 35.0;
-                l.Y2 = (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 35.0;
-                l.StrokeThickness = Math.Max(0.5, Math.Abs(c.Intensity) * 3);
-                l.Stroke = c.Intensity < 0 ? Brushes.Red : Brushes.Green;
-                canvas.Children.Insert(0, l);
+                if (c.From == c.To)
+                {
+                    var l = new Path();
+                    var d = new PathGeometry();
+                    l.Data = d;
+                    var p = new PathFigure();
+                    d.Figures.Add(p);
+                    var s = new BezierSegment();
+                    p.Segments.Add(s);
+                    p.StartPoint = new Point((double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 35.0, (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0);
+                    s.Point1 = new Point((double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 135.0, (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0);
+                    s.Point2 = new Point((double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 35.0, (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 135.0);
+                    s.Point3 = new Point((double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 35.0, (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 35.0);
+                    l.StrokeThickness = Math.Max(0.5, Math.Abs(c.Intensity) * 3);
+                    l.Stroke = c.Intensity < 0 ? Brushes.Red : Brushes.Green;
+                    canvas.Children.Insert(0, l);
+                }
+                else
+                {
+                    var l = new Path();
+                    var d = new PathGeometry();
+                    l.Data = d;
+                    var p = new PathFigure();
+                    d.Figures.Add(p);
+                    var s = new BezierSegment();
+                    p.Segments.Add(s);
+                    p.StartPoint = new Point((double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 35.0, (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0);
+                    s.Point1 = new Point((double)neuronLookup[c.From].GetValue(Canvas.LeftProperty) + 135.0, (double)neuronLookup[c.From].GetValue(Canvas.TopProperty) + 35.0);
+                    s.Point2 = new Point((double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 135.0, (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 35.0);
+                    s.Point3 = new Point((double)neuronLookup[c.To].GetValue(Canvas.LeftProperty) + 35.0, (double)neuronLookup[c.To].GetValue(Canvas.TopProperty) + 35.0);
+                    l.StrokeThickness = Math.Max(0.5, Math.Abs(c.Intensity) * 3);
+                    l.Stroke = c.Intensity < 0 ? Brushes.Red : Brushes.Green;
+                    canvas.Children.Insert(0, l);
+                }
             }
+            canvas.Width = pos.Max() + 110;
 
             return canvas;
         }
