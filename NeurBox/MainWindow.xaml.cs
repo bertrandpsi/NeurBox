@@ -88,6 +88,15 @@ return (d < 30);";
             survivalPlot.Plot.Legend();
             survivalPlot.Plot.Add(signalPlot);
             survivalPlot.Refresh();
+
+            var w = CSParsing.LoadAndExecute(@"using NeurBox; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
+            var assembly = ((SimpleUnloadableAssemblyLoadContext)w.Target).Assemblies.First();
+            var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if(!(bool)method.Invoke(null, new object[] { null }))
+            {
+
+            }
+            //CSParsing.UnloadAssembly(w);
         }
 
         private void WorldGrid_GenerationSurvivalEvent(object? sender, double survivalRate)

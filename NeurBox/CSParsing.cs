@@ -34,14 +34,11 @@ namespace NeurBox
             {
                 references = new MetadataReference[]
                 {
-                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeurBox.dll"),
-                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.dll"),
-                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Core.dll"),
-                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Runtime.dll"),
-                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Private.CoreLib.dll"),
-                    /*MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
-                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),*/
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeurBox.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Core.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Runtime.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Private.CoreLib.dll"),
                 };
             }
             catch

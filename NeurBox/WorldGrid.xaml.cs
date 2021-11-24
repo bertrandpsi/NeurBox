@@ -61,14 +61,17 @@ namespace NeurBox
         public void PaintSafeArea()
         {
             worldCanvas.Children.Clear();
+            var critter = new Critter { X = 0, Y = 0 };
             var fill = new SolidColorBrush(Color.FromRgb(180, 255, 180));
-            for (int x = 0; x < GridSize; x++)
+            for (int x = 0; x < GridSize; x += 2)
             {
-                for (int y = 0; y < GridSize; y++)
+                for (int y = 0; y < GridSize; y += 2)
                 {
-                    if (!SelectionFunction(new Critter { X = x, Y = y }))
+                    critter.X = x;
+                    critter.Y = y;
+                    if (!SelectionFunction(critter))
                     {
-                        var r = new Rectangle { Width = 4.5, Height = 4.5, Fill = fill };
+                        var r = new Rectangle { Width = 8.5, Height = 8.5, Fill = fill };
                         r.SetValue(Canvas.LeftProperty, x * 4.0);
                         r.SetValue(Canvas.TopProperty, y * 4.0);
                         worldCanvas.Children.Add(r);
@@ -126,6 +129,7 @@ namespace NeurBox
             // Place the critter on the screen
             Critters.ForEach(c =>
             {
+                c.CalculateColor();
                 worldCanvas.Children.Add(c);
                 c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
                 c.SetValue(Canvas.TopProperty, (double)c.Y * 4);

@@ -80,8 +80,6 @@ namespace NeurBox
                     i++;
                 }
             }
-
-            CalculateColor();
         }
 
         Color ColorFromString(string src)
