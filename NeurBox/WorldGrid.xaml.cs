@@ -119,8 +119,8 @@ namespace NeurBox
             {
                 do
                 {
-                    c.X = Random.Next(0, GridSize);
-                    c.Y = Random.Next(0, GridSize);
+                    c.X = Random.Next(0, GridSize - 1);
+                    c.Y = Random.Next(0, GridSize - 1);
                 } while (Grid[c.X, c.Y] != -1);
                 Grid[c.X, c.Y] = 1;
                 c.Build();

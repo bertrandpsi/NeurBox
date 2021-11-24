@@ -130,7 +130,7 @@ namespace NeurBox
         internal void MoveEast()
         {
             gridMovement.Wait();
-            if (X < World.GridSize - 1 && World.Grid[X + 1, Y] == -1)
+            if (X < World.GridSize - 2 && World.Grid[X + 1, Y] == -1)
             {
                 World.Grid[X, Y] = -1;
                 X++;
@@ -154,7 +154,7 @@ namespace NeurBox
         internal void MoveSouth()
         {
             gridMovement.Wait();
-            if (Y < World.GridSize - 1 && World.Grid[X, Y + 1] == -1)
+            if (Y < World.GridSize - 2 && World.Grid[X, Y + 1] == -1)
             {
                 World.Grid[X, Y] = -1;
                 Y++;
