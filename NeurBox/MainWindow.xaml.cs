@@ -161,6 +161,9 @@ public static class EvalClass
             worldGrid.NumberCritter = NumberCritter;
             worldGrid.MutationRate = MutationRate;
             worldGrid.DnaMixing = DnaMixing;
+
+            worldGrid.PaintSafeArea();
+
             worldGrid.Reset();
             worldGrid.Spawn();
             worldGrid.Start();

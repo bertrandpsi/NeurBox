@@ -57,11 +57,31 @@ namespace NeurBox
         public bool DnaMixing { get; internal set; }
         public double DNASimilarity { get; private set; }
 
+        public void PaintSafeArea()
+        {
+            worldCanvas.Children.Clear();
+            var fill = new SolidColorBrush(Color.FromRgb(180, 255, 180));
+            for (int x = 0; x < GridSize; x++)
+            {
+                for (int y = 0; y < GridSize; y++)
+                {
+                    if (!SelectionFunction(new Critter { X = x, Y = y }))
+                    {
+                        var r = new Rectangle { Width = 4.5, Height = 4.5, Fill = fill };
+                        r.SetValue(Canvas.LeftProperty, x * 4.0);
+                        r.SetValue(Canvas.TopProperty, y * 4.0);
+                        worldCanvas.Children.Add(r);
+                    }
+                }
+            }
+        }
+
         internal void Reset()
         {
             simulationTime = 0;
+            var toClear = worldCanvas.Children.OfType<Critter>().ToList();
+            toClear.ForEach(critter => worldCanvas.Children.Remove(critter));
             Critters.Clear();
-            worldCanvas.Children.Clear();
             Grid = new int[GridSize, GridSize];
             for (int i = 0; i < GridSize; i++)
                 for (int j = 0; j < GridSize; j++)
