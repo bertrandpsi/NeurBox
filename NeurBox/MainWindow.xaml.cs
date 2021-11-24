@@ -92,7 +92,7 @@ return (d < 30);";
             var w = CSParsing.LoadAndExecute(@"using NeurBox; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
             var assembly = ((SimpleUnloadableAssemblyLoadContext)w.Target).Assemblies.First();
             var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if(!(bool)method.Invoke(null, new object[] { null }))
+            if (!(bool)method.Invoke(null, new object[] { null }))
             {
 
             }
@@ -109,9 +109,19 @@ return (d < 30);";
         private void dispatcherTimer_Tick(object? sender, EventArgs e)
         {
             survival.Text = (worldGrid.SurvivalRate * 100).ToString("F2") + "%";
+            statusSurvival.Text = "Survival: " + survival.Text;
             generation.Text = worldGrid.Generation.ToString();
-            timePerGeneration.Text = worldGrid.TimePerGeneration.ToString();
+            timePerGeneration.Text = worldGrid.TimePerGeneration.ToString(@"hh\:mm\:ss\.ff");
+            statusTimePerGeneration.Text = "Time: " + timePerGeneration.Text;
             geneticSimilarities.Text = (worldGrid.DNASimilarity * 100).ToString("F2") + "%";
+        }
+
+        private void HandleLinkClick(object sender, RoutedEventArgs e)
+        {
+            Hyperlink hl = (Hyperlink)sender;
+            string navigateUri = hl.NavigateUri.ToString();
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd", $"/c start {navigateUri}") { CreateNoWindow = true });
+            e.Handled = true;
         }
 
         WeakReference weakReference = null;
@@ -121,6 +131,7 @@ return (d < 30);";
             {
                 worldGrid.Stop();
                 startButton.Content = "Start";
+                statusSimultation.Text = "Status: Idle";
                 ((Label)toolRun.Content).Content = "Run";
                 dnaCheckBox.IsEnabled = true;
                 foreach (var t in parameterGrid.Children.OfType<TextBox>())
@@ -178,6 +189,7 @@ public static class EvalClass
             worldGrid.Reset();
             worldGrid.Spawn();
             worldGrid.Start();
+            statusSimultation.Text = "Status: Running...";
             startButton.Content = "Stop";
             ((Label)toolRun.Content).Content = "Stop";
             dnaCheckBox.IsEnabled = false;

@@ -56,6 +56,19 @@ namespace NeurBox
         public TimeSpan TimePerGeneration { get; private set; }
         public bool DnaMixing { get; internal set; }
         public double DNASimilarity { get; private set; }
+        List<Critter> topMostUsed = new List<Critter>();
+        public List<Critter> TopMostUsed
+        {
+            get
+            {
+                lock (topMostLock)
+                    return topMostUsed.ToList();
+            }
+            private set
+            {
+                topMostUsed = value;
+            }
+        }
         public double MinReproductionFactor { get; set; }
 
         public void PaintSafeArea()
@@ -240,6 +253,8 @@ namespace NeurBox
         }
 
         bool isCalculatingSimilarities = false;
+        private object topMostLock=new object();
+
         void CalculatingSimilarities(List<Critter> critters)
         {
             if (isCalculatingSimilarities)
@@ -250,7 +265,10 @@ namespace NeurBox
             {
                 var allCouples = AllCouplePermutations(critters).Select(couple => new { Couple = couple, Similarity = couple.Item1.CompareDNA(couple.Item2) }).ToList();
                 DNASimilarity = allCouples.Average(row => row.Similarity);
-                var topMostUsed = allCouples.OrderByDescending(row => row.Similarity).Take(3).Select(row => row.Couple.Item1).ToList();
+                lock (topMostLock)
+                {
+                    TopMostUsed = allCouples.OrderByDescending(row => row.Similarity).Take(3).Select(row => row.Couple.Item1).ToList();
+                }
                 isCalculatingSimilarities = false;
             });
         }
