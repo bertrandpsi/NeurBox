@@ -15,26 +15,46 @@ namespace NeurBox
     // Taken from https://laurentkempe.com/2019/02/18/dynamically-compile-and-run-code-using-dotNET-Core-3.0/
     internal static class CSParsing
     {
+        /*public static MetadataReference MetadataReferenceFromAssembly(Assembly assembly)
+        {
+            return MetadataReference.CreateFromImage((byte[])(assembly.GetType().GetMethod("GetRawBytes", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(assembly,null)));
+        }*/
+
         public static CSharpCompilation GenerateCode(string sourceCode)
         {
             var codeString = SourceText.From(sourceCode);
-            var options = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp7_3);
+            var options = CSharpParseOptions.Default.WithLanguageVersion(LanguageVersion.CSharp10);
 
             var parsedSyntaxTree = SyntaxFactory.ParseSyntaxTree(codeString, options);
 
-            var references = new MetadataReference[]
-            {
-                MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
-                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),
-            };
 
-            return CSharpCompilation.Create("temp.dll",
-                new[] { parsedSyntaxTree },
-                references: references,
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary,
-                    optimizationLevel: OptimizationLevel.Release,
-                    assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default));
+            MetadataReference[] references;
+
+            try
+            {
+                references = new MetadataReference[]
+                {
+                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeurBox.dll"),
+                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.dll"),
+                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Core.dll"),
+                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Runtime.dll"),
+                MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Private.CoreLib.dll"),
+                    /*MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),*/
+                };
+            }
+            catch
+            {
+                references = new MetadataReference[]
+                {
+                    MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
+                    MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),
+                };
+            }
+
+            return CSharpCompilation.Create("temp.dll", new[] { parsedSyntaxTree }, references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release, assemblyIdentityComparer: DesktopAssemblyIdentityComparer.Default));
         }
 
         public static byte[] Compile(string sourceCode)

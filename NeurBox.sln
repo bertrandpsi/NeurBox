@@ -8,6 +8,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B4529316-B969-4461-A45F-6042713AF4BA}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		NeurBox\bin\Release\net6.0-windows\publish\copy_missing_dlls.cmd = NeurBox\bin\Release\net6.0-windows\publish\copy_missing_dlls.cmd
 	EndProjectSection
 EndProject
 Global
