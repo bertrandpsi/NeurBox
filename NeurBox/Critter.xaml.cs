@@ -44,13 +44,13 @@ namespace NeurBox
 
         internal List<Neuron> Neurons = new List<Neuron>();
 
-        static List<Type> inputs;
-        static List<Type> outputs;
+        static List<ConstructorInfo> inputs;
+        static List<ConstructorInfo> outputs;
 
         static Critter()
         {
-            inputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(InputNeuron))).ToList();
-            outputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(OutputNeuron))).ToList();
+            inputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(InputNeuron))).Select(t=> t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())).ToList();
+            outputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(OutputNeuron))).Select(t => t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())).ToList();
         }
 
         public void Build()
@@ -58,8 +58,8 @@ namespace NeurBox
             if (Neurons.Count == 0)
             {
                 // Creates all the neurons
-                Neurons.AddRange(inputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
-                Neurons.AddRange(outputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+                Neurons.AddRange(inputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
+                Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
                 Neurons.AddRange(Enumerable.Range(0, InternalNeurons).Select(_ => new InternalNeuron()));
                 Neurons.ForEach(n => n.Critter = this);
             }
@@ -67,7 +67,7 @@ namespace NeurBox
             if (ConnectionsUsed < NetworkConnections)
             {
                 var nonInputs = Neurons.Skip(inputs.Count).ToList();
-                var nonOuputs = Neurons.Where(n => !(n is OutputNeuron)).ToList();
+                var nonOuputs = Neurons.Take(inputs.Count + InternalNeurons).ToList();
 
                 // Create all the connections
                 for (var i = ConnectionsUsed; i < NetworkConnections;)
@@ -76,7 +76,7 @@ namespace NeurBox
                     var b = nonOuputs[WorldGrid.Random.Next(nonOuputs.Count)];
                     if (a.AlreadyConnectedWith(b))
                         continue;
-                    a.Connect(b, WorldGrid.Random.NextDouble() * 1.6 - 0.2);
+                    a.Connect(b, WorldGrid.Random.NextDouble() * 1.8 - 0.9);
                     i++;
                 }
             }
@@ -181,8 +181,8 @@ namespace NeurBox
             var dnaConnections = dna.Split(' ').ToList();
             result.InternalNeurons = int.Parse(dnaConnections[0], System.Globalization.NumberStyles.HexNumber);
 
-            result.Neurons.AddRange(inputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
-            result.Neurons.AddRange(outputs.Select(t => (Neuron)t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>()).Invoke(Array.Empty<object>())));
+            result.Neurons.AddRange(inputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
+            result.Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
             result.Neurons.AddRange(Enumerable.Range(0, result.InternalNeurons).Select(_ => new InternalNeuron()));
             result.Neurons.ForEach(n => n.Critter = result);
 
