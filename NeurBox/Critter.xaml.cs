@@ -83,16 +83,16 @@ namespace NeurBox
 
         Color ColorFromString(string src)
         {
-            var hash = src.GetHashCode();
-            var r = hash % 200 + 30;
-            var g = (hash / 200) % 200 + 30;
-            var b = (hash / (200 * 200)) % 200 + 30;
+            var hash = src.Substring(0, 6).GetHashCode();
+            var r = Math.Min(255, (hash % 250) * 2.2);
+            var g = Math.Min(255, ((hash / 250) % 250) * 2.2);
+            var b = Math.Min(255, ((hash / (250 * 250)) % 250) * 2.2);
             return Color.FromRgb((byte)r, (byte)g, (byte)b);
         }
 
         public void CalculateColor()
         {
-            var colors = DNA.Split(' ').Select(d => ColorFromString(d));
+            var colors = DNA.Split(' ').Skip(1).Select(d => ColorFromString(d));
             dot.Fill = new SolidColorBrush(Color.FromRgb((byte)colors.Average(c => c.R), (byte)colors.Average(c => c.G), (byte)colors.Average(c => c.B)));
         }
 
