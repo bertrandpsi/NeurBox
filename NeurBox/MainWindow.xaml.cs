@@ -29,6 +29,7 @@ namespace NeurBox
         public int LifeSpan { get; set; } = 300;
         public int NumberCritter { get; set; } = 500;
         public double MutationRate { get; set; } = 0.01;
+        public double MinReproductionFactor { get; set; } = 0.8;
 
         private ScatterPlotList signalPlot;
 
@@ -159,7 +160,8 @@ public static class EvalClass
             worldGrid.NetworkConnections = NetworkConnections;
             worldGrid.GridSize = GridSize;
             worldGrid.NumberCritter = NumberCritter;
-            worldGrid.MutationRate = MutationRate;
+            worldGrid.MutationRate = Math.Min(1, Math.Max(0, MutationRate));
+            worldGrid.MinReproductionFactor = Math.Min(1, Math.Max(0, MinReproductionFactor));
             worldGrid.DnaMixing = DnaMixing;
 
             worldGrid.PaintSafeArea();

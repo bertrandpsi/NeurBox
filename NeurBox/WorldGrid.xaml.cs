@@ -56,6 +56,7 @@ namespace NeurBox
         public TimeSpan TimePerGeneration { get; private set; }
         public bool DnaMixing { get; internal set; }
         public double DNASimilarity { get; private set; }
+        public double MinReproductionFactor { get; set; }
 
         public void PaintSafeArea()
         {
@@ -272,7 +273,7 @@ namespace NeurBox
                     dnas = MixDNA(dnas);
 
                 if (dnas.Count > 0)
-                    Critters.AddRange(Enumerable.Range(0, NumberCritter).Select(_ => Critter.FromDNA(dnas[Random.Next(0, dnas.Count)], MutationRate)));
+                    Critters.AddRange(Enumerable.Range(0, (int)Math.Max(NumberCritter * MinReproductionFactor, Critters.Count)).Select(_ => Critter.FromDNA(dnas[Random.Next(0, dnas.Count)], MutationRate)));
                 Critters.ForEach(c =>
                 {
                     c.MaxLifeSpan = LifeSpan;
