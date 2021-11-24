@@ -54,6 +54,8 @@ namespace NeurBox
         public double MutationRate { get; internal set; }
         public Stopwatch TimeWatch { get; private set; }
         public TimeSpan TimePerGeneration { get; private set; }
+        public bool DnaMixing { get; internal set; }
+        public double DNASimilarity { get; private set; }
 
         internal void Reset()
         {
@@ -167,6 +169,67 @@ namespace NeurBox
             }
         }
 
+        private List<string> MixDNA(List<string> dnas)
+        {
+            var nbToDo = dnas.Count;
+            var result = new List<string>();
+            for (int i = 0; i < nbToDo; i++)
+            {
+                var a = dnas[Random.Next(nbToDo)];
+                var b = dnas[Random.Next(nbToDo)];
+                if (a == b)
+                    result.Add(a);
+                else
+                {
+                    var pa = a.Split(' ');
+                    var pb = b.Split(' ');
+                    var genes = new List<string>();
+                    for (int j = 0; j < pa.Length; j++)
+                    {
+                        if (Random.Next(2) == 0)
+                            genes.Add(pa[j]);
+                        else
+                            genes.Add(pb[j]);
+                    }
+                    result.Add(string.Join(" ", genes));
+                }
+            }
+            return result;
+        }
+
+        IEnumerable<(TType, TType)> AllCouplePermutations<TType>(List<TType> source)
+        {
+            var alreadyChecked = new Dictionary<(int, int), bool>();
+            for (int i = 0; i < source.Count; i++)
+            {
+                for (int j = 0; j < source.Count; j++)
+                {
+                    if (i == j)
+                        continue;
+                    if (alreadyChecked.ContainsKey((i, j)) || alreadyChecked.ContainsKey((j, i)))
+                        continue;
+                    alreadyChecked.Add((i, j), true);
+                    yield return (source[i], source[j]);
+                }
+            }
+        }
+
+        bool isCalculatingSimilarities = false;
+        void CalculatingSimilarities(List<Critter> critters)
+        {
+            if (isCalculatingSimilarities)
+                return;
+            isCalculatingSimilarities = true;
+            // In a background thread as it's really slow to check all the permutations
+            Task.Run(() =>
+            {
+                var allCouples = AllCouplePermutations(critters).Select(couple => new { Couple = couple, Similarity = couple.Item1.CompareDNA(couple.Item2) }).ToList();
+                DNASimilarity = allCouples.Average(row => row.Similarity);
+                var topMostUsed = allCouples.OrderByDescending(row => row.Similarity).Take(3).Select(row => row.Couple.Item1).ToList();
+                isCalculatingSimilarities = false;
+            });
+        }
+
         private void NextGeneration()
         {
             Generation++;
@@ -179,9 +242,14 @@ namespace NeurBox
                     c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
                 });
 
+                CalculatingSimilarities(Critters.ToList());
+
                 var dnas = SelectionCriteria();
 
                 Reset();
+
+                if (DnaMixing)
+                    dnas = MixDNA(dnas);
 
                 if (dnas.Count > 0)
                     Critters.AddRange(Enumerable.Range(0, NumberCritter).Select(_ => Critter.FromDNA(dnas[Random.Next(0, dnas.Count)], MutationRate)));
@@ -201,14 +269,8 @@ namespace NeurBox
 
         private List<string> SelectionCriteria()
         {
-            /*Critters.RemoveAll(row =>
-            {
-                var a = 50 - row.X;
-                var b = 50 - row.Y;
-                var d=Math.Sqrt(b * b + a * a);
-                return (d > 30);
-            } );*/
-            Critters.RemoveAll(SelectionFunction);
+            if (SelectionFunction != null)
+                Critters.RemoveAll(SelectionFunction);
             SurvivalRate = (double)Critters.Count / (double)NumberCritter;
             GenerationSurvivalEvent?.Invoke(this, SurvivalRate);
             var dnas = Critters.Select(row => row.DNA).ToList();

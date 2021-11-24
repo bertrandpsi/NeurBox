@@ -1,5 +1,4 @@
-﻿using CSScriptLib;
-using ScottPlot.Plottable;
+﻿using ScottPlot.Plottable;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,14 +30,36 @@ namespace NeurBox
         public int NumberCritter { get; set; } = 500;
         public double MutationRate { get; set; } = 0.01;
 
-        private bool inRealTime = false;
         private ScatterPlotList signalPlot;
 
-        public string SelectionCondition { get; set; } = @"var a = 50 - critter.X;
+        public string SelectionCondition { get; set; } = @"
+// You may re-use any of those code to change the selection or write your own
+
+// Use this to select only those which are on the 1/3 left part
+// return critter.X < 30;
+
+// Use this to select only those which are on the 1/3 right part
+// return critter.X > 70;
+
+// Use this to select only those which are on the 1/3 top part
+// return critter.Y < 30;
+
+// Use this to select only those which are on the 1/3 bottom part
+// return critter.Y > 70;
+
+// Use this to select only those which are near the corners
+// Works better without DNA mixing
+// return (critter.X < 20 && critter.Y < 20) || (critter.X > 80 && critter.Y < 20) || (critter.X < 20 && critter.Y > 80) || (critter.X > 80 && critter.Y > 80);
+
+// Use this to select only those which are in center
+var a = 50 - critter.X;
 var b = 50 - critter.Y;
 var d=Math.Sqrt(b * b + a * a);
 return (d < 30);";
 
+        public bool DnaMixing { get; set; } = true;
+
+        private bool inRealTime = false;
         public bool InRealTime
         {
             get
@@ -80,20 +101,34 @@ return (d < 30);";
             survival.Text = (worldGrid.SurvivalRate * 100).ToString("F2") + "%";
             generation.Text = worldGrid.Generation.ToString();
             timePerGeneration.Text = worldGrid.TimePerGeneration.ToString();
+            geneticSimilarities.Text = (worldGrid.DNASimilarity * 100).ToString("F2") + "%";
         }
 
         WeakReference weakReference = null;
         private void Start_Click(object sender, RoutedEventArgs e)
         {
+            if (startButton.Content.ToString() == "Stop")
+            {
+                worldGrid.Stop();
+                startButton.Content = "Start";
+                ((Label)toolRun.Content).Content = "Run";
+                dnaCheckBox.IsEnabled = true;
+                foreach (var t in parameterGrid.Children.OfType<TextBox>())
+                    t.IsEnabled = true;
+                return;
+            }
+
             // Unload the previous weakReference
-            if(weakReference != null)
+            if (weakReference != null)
             {
                 worldGrid.SelectionFunction = null;
                 CSParsing.UnloadAssembly(weakReference);
                 weakReference = null;
             }
 
-            weakReference = CSParsing.LoadAndExecute(@"using NeurBox;
+            try
+            {
+                weakReference = CSParsing.LoadAndExecute(@"using NeurBox;
 using System;
 public static class EvalClass
 {
@@ -103,6 +138,13 @@ public static class EvalClass
 }
 }
 ");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error in the Selection Condition code");
+                return;
+            }
+
             var assembly = ((SimpleUnloadableAssemblyLoadContext)weakReference.Target).Assemblies.First();
             var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             worldGrid.SelectionFunction = (critter) => !(bool)method.Invoke(null, new object[] { critter });
@@ -111,30 +153,22 @@ public static class EvalClass
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
             survivalPlot.Refresh();
 
-            if (startButton.Content.ToString() == "Stop")
-            {
-                worldGrid.Stop();
-                startButton.Content = "Start";
-                ((Label)toolRun.Content).Content = "Run";
-                foreach (var t in parameterGrid.Children.OfType<TextBox>())
-                    t.IsEnabled = true;
-            }
-            else
-            {
-                worldGrid.LifeSpan = LifeSpan;
-                worldGrid.InternalNeurons = InternalNeurons;
-                worldGrid.NetworkConnections = NetworkConnections;
-                worldGrid.GridSize = GridSize;
-                worldGrid.NumberCritter = NumberCritter;
-                worldGrid.MutationRate = MutationRate;
-                worldGrid.Reset();
-                worldGrid.Spawn();
-                worldGrid.Start();
-                startButton.Content = "Stop";
-                ((Label)toolRun.Content).Content = "Stop";
-                foreach (var t in parameterGrid.Children.OfType<TextBox>())
-                    t.IsEnabled = false;
-            }
+
+            worldGrid.LifeSpan = LifeSpan;
+            worldGrid.InternalNeurons = InternalNeurons;
+            worldGrid.NetworkConnections = NetworkConnections;
+            worldGrid.GridSize = GridSize;
+            worldGrid.NumberCritter = NumberCritter;
+            worldGrid.MutationRate = MutationRate;
+            worldGrid.DnaMixing = DnaMixing;
+            worldGrid.Reset();
+            worldGrid.Spawn();
+            worldGrid.Start();
+            startButton.Content = "Stop";
+            ((Label)toolRun.Content).Content = "Stop";
+            dnaCheckBox.IsEnabled = false;
+            foreach (var t in parameterGrid.Children.OfType<TextBox>())
+                t.IsEnabled = false;
         }
     }
 }

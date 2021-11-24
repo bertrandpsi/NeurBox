@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace NeurBox
 {
     // Taken from https://laurentkempe.com/2019/02/18/dynamically-compile-and-run-code-using-dotNET-Core-3.0/
-    internal class CSParsing
+    internal static class CSParsing
     {
         public static CSharpCompilation GenerateCode(string sourceCode)
         {
@@ -26,10 +26,7 @@ namespace NeurBox
             {
                 MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
                 MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(System.Runtime.AssemblyTargetedPatchBandAttribute).Assembly.Location),
-                MetadataReference.CreateFromFile(typeof(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo).Assembly.Location),
             };
 
             return CSharpCompilation.Create("temp.dll",

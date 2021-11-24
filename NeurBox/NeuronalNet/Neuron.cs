@@ -24,7 +24,7 @@ namespace NeurBox.NeuronalNet
             return InRange(Connections.Sum(row => row.From.GetValue(depth + 1) * row.Intensity) / (Connections.Count / 2.0));
         }
 
-        private double InRange(double source)
+        public static double InRange(double source)
         {
             return Math.Atan(source * 2);
         }

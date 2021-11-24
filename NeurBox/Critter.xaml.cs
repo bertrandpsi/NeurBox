@@ -81,13 +81,49 @@ namespace NeurBox
             CalculateColor();
         }
 
-        public void CalculateColor()
+        Color ColorFromString(string src)
         {
-            var hash = DNA.GetHashCode();
+            var hash = src.GetHashCode();
             var r = hash % 200 + 30;
             var g = (hash / 200) % 200 + 30;
             var b = (hash / (200 * 200)) % 200 + 30;
-            dot.Fill = new SolidColorBrush(Color.FromRgb((byte)r, (byte)g, (byte)b));
+            return Color.FromRgb((byte)r, (byte)g, (byte)b);
+        }
+
+        public void CalculateColor()
+        {
+            var colors = DNA.Split(' ').Select(d => ColorFromString(d));
+            dot.Fill = new SolidColorBrush(Color.FromRgb((byte)colors.Average(c => c.R), (byte)colors.Average(c => c.G), (byte)colors.Average(c => c.B)));
+        }
+
+        IEnumerable<(TTypeA, TTypeB)> Mix<TTypeA, TTypeB>(IEnumerable<TTypeA> a, IEnumerable<TTypeB> b)
+        {
+            var pos = 0;
+            var enumerator = b.GetEnumerator();
+            foreach (var av in a)
+            {
+                enumerator.MoveNext();
+                yield return (av, enumerator.Current);
+            }
+        }
+
+        public double CompareDNA(Critter other)
+        {
+            return Mix(DNA.Split(' ').Skip(1), other.DNA.Split(' ').Skip(1)).Average(genome => CompareGenome(genome.Item1, genome.Item2));
+        }
+
+        double CompareGenome(string a, string b)
+        {
+            if (a == b)
+                return 1;
+            if (a.Substring(0, 6) == b.Substring(0, 6))
+            {
+                var va = (int.Parse(a.Substring(6), System.Globalization.NumberStyles.HexNumber) - 4000.0) / 4000.0;
+                var vb = (int.Parse(a.Substring(6), System.Globalization.NumberStyles.HexNumber) - 4000.0) / 4000.0;
+                //return 0.75 + Math.Max(0, Math.Min(1, 1 - Math.Abs(va - vb))) / 4.0;
+                return 0.75 + (Neuron.InRange(Math.Abs(va - vb)) + 1) / 8.0;
+            }
+            return 0;
         }
 
         internal void MoveEast()
