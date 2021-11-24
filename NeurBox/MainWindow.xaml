@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:NeurBox"
         mc:Ignorable="d"
-        Title="NeurBox" Height="800" Width="800"
+        Title="NeurBox" Height="800" Width="800" d:Width="800" d:Height="600"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         ResizeMode="CanResizeWithGrip">
     <Grid>
@@ -14,12 +14,12 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ToolBar Grid.Row="0">
-            <Button Click="Start_Click" x:Name="toolRun">
-                <Label>Run</Label>
-            </Button>
-        </ToolBar>
-        <TabControl Grid.Row="1">
+        <ToolBarPanel Grid.Row="0" >
+            <ToolBar ToolBarTray.IsLocked="True">
+                <Button Click="Start_Click" x:Name="toolRun" Content="Run"/>
+            </ToolBar>
+        </ToolBarPanel>
+        <TabControl Grid.Row="1" x:Name="mainTabControl">
             <TabItem Header="Help">
                 <ScrollViewer>
                     <StackPanel Orientation="Vertical">
@@ -60,7 +60,7 @@ This software has been written by Alain Bertrand (c) 2021. The base idea / conce
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Simulation">
+            <TabItem Header="Simulation" x:Name="simultationTab">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />

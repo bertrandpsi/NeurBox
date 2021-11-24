@@ -132,12 +132,17 @@ return (d < 30);";
                 worldGrid.Stop();
                 startButton.Content = "Start";
                 statusSimultation.Text = "Status: Idle";
-                ((Label)toolRun.Content).Content = "Run";
+                toolRun.Content = "Run";
                 dnaCheckBox.IsEnabled = true;
                 foreach (var t in parameterGrid.Children.OfType<TextBox>())
                     t.IsEnabled = true;
                 return;
             }
+
+            mainTabControl.SelectedItem = simultationTab;
+            statusSimultation.Text = "Status: Running...";
+            startButton.Content = "Stop";
+            toolRun.Content = "Stop";
 
             // Unload the previous weakReference
             if (weakReference != null)
@@ -189,9 +194,6 @@ public static class EvalClass
             worldGrid.Reset();
             worldGrid.Spawn();
             worldGrid.Start();
-            statusSimultation.Text = "Status: Running...";
-            startButton.Content = "Stop";
-            ((Label)toolRun.Content).Content = "Stop";
             dnaCheckBox.IsEnabled = false;
             foreach (var t in parameterGrid.Children.OfType<TextBox>())
                 t.IsEnabled = false;
