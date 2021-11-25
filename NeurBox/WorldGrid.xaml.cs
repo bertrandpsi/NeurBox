@@ -338,12 +338,19 @@ namespace NeurBox
                 Spawn();
             }).ContinueWith(_ =>
             {
-                Dispatcher.Invoke(ReuseCritterDisplay);
+                try
+                {
+                    Dispatcher.Invoke(ReuseCritterDisplay);
 
-                simulationRunner = new Thread(SimulationThread);
-                simulationRunner.IsBackground = true;
-                simulationRunner.Start();
-                dispatcherTimer.Start();
+                    simulationRunner = new Thread(SimulationThread);
+                    simulationRunner.IsBackground = true;
+                    simulationRunner.Start();
+                    dispatcherTimer.Start();
+                }
+                catch
+                {
+                    SimulationMustRun = false;
+                }
             });
         }
 

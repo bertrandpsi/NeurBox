@@ -13,7 +13,7 @@ namespace NeurBox
         public int GridSize { get; set; } = 100;
         public int LifeSpan { get; set; } = 300;
         public int NumberCritter { get; set; } = 500;
-        public double MutationRate { get; set; } = 0.005;
+        public double MutationRate { get; set; } = 0.001;
         public double MinReproductionFactor { get; set; } = 0.9;
         public bool DnaMixing { get; set; } = true;
         public MainWindow MainWindow { get; set; }
