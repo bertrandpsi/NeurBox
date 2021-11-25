@@ -65,7 +65,6 @@ namespace NeurBox
 
         IEnumerable<(TTypeA, TTypeB)> Mix<TTypeA, TTypeB>(IEnumerable<TTypeA> a, IEnumerable<TTypeB> b)
         {
-            var pos = 0;
             var enumerator = b.GetEnumerator();
             foreach (var av in a)
             {
