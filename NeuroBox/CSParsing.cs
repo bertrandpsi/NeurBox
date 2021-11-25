@@ -38,7 +38,7 @@ namespace NeuroBox
             {
                 references = new MetadataReference[]
                 {
-                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeurBox.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeuroBox.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Core.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Runtime.dll"),
