@@ -156,14 +156,22 @@ namespace NeurBox
             return result;
         }
 
+        List<InputNeuron> knownInputs;
+        List<OutputNeuron> knownOutputs;
         internal void Execute()
         {
             LifeSpan++;
 
-            foreach (var n in Neurons.OfType<InputNeuron>().Where(row => row.IsConnected).Cast<InputNeuron>())
+            if (knownInputs == null)
+            {
+                knownInputs = Neurons.OfType<InputNeuron>().Where(row => row.IsConnected).Cast<InputNeuron>().ToList();
+                knownOutputs = Neurons.OfType<OutputNeuron>().Where(row => row.HasConnections).Cast<OutputNeuron>().ToList();
+            }
+
+            foreach (var n in knownInputs)
                 n.StoreCache();
 
-            foreach (var n in Neurons.OfType<OutputNeuron>().Where(row => row.HasConnections).Cast<OutputNeuron>())
+            foreach (var n in knownOutputs)
                 n.Execute();
         }
     }

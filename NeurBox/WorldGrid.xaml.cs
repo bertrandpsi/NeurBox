@@ -90,14 +90,19 @@ namespace NeurBox
         internal void Reset()
         {
             simulationTime = 0;
-            var toClear = worldCanvas.Children.OfType<CritterDisplay>().ToList();
-            toClear.ForEach(critter => worldCanvas.Children.Remove(critter));
-            Critters.Clear();
-            CrittersDisplay.Clear();
             Grid = new int[GridSize, GridSize];
             for (int i = 0; i < GridSize; i++)
                 for (int j = 0; j < GridSize; j++)
                     Grid[i, j] = -1;
+
+            Critters.Clear();
+        }
+
+        internal void ResetDisplay()
+        {
+            var toClear = worldCanvas.Children.OfType<CritterDisplay>().ToList();
+            toClear.ForEach(critter => worldCanvas.Children.Remove(critter));
+            CrittersDisplay.Clear();
         }
 
         internal void Stop()
@@ -109,16 +114,7 @@ namespace NeurBox
             dispatcherTimer.Stop();
         }
 
-        internal void Spawn(bool mustLock = true)
-        {
-            if (mustLock)
-                lock (Critters)
-                    UnsafeSpawn();
-            else
-                UnsafeSpawn();
-        }
-
-        private void UnsafeSpawn()
+        internal void Spawn()
         {
             // Generate some random Critter
             Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
@@ -141,7 +137,10 @@ namespace NeurBox
                 Grid[c.X, c.Y] = 1;
                 c.Build();
             });
+        }
 
+        private void CreateCritterDisplay()
+        {
             // Place the critter on the screen
             Critters.ForEach(c =>
             {
@@ -152,6 +151,19 @@ namespace NeurBox
                 d.SetValue(Canvas.TopProperty, (double)c.Y * 4);
                 CrittersDisplay.Add(d);
             });
+        }
+
+        private void ReuseCritterDisplay()
+        {
+            for(var i=0;i < Critters.Count;i++)
+            {
+                var c = Critters[i];
+                var d = CrittersDisplay[i];
+                d.Critter = c;
+                d.CalculateColor();
+                d.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                d.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+            }
         }
 
         void SimulationThread()
@@ -170,11 +182,13 @@ namespace NeurBox
                 simulationTime++;
                 if (simulationTime >= LifeSpan)
                 {
-                    this.Dispatcher.BeginInvoke(new Action(() =>
+                    simulationRunner = null;
+                    Dispatcher.Invoke(() =>
                     {
                         NextGeneration();
-                    }));
-                    simulationTime = 0;
+                        simulationTime = 0;
+                    });
+                    return;
                 }
             }
             simulationRunner = null;
@@ -199,7 +213,10 @@ namespace NeurBox
                 LogicLoop();
                 simulationTime++;
                 if (simulationTime >= LifeSpan)
+                {
                     NextGeneration();
+                    return;
+                }
             }
 
             lock (Critters)
@@ -285,18 +302,20 @@ namespace NeurBox
 
         private void NextGeneration()
         {
+            dispatcherTimer.Stop();
             Generation++;
             TimePerGeneration = TimeWatch.Elapsed / Generation;
-            lock (Critters)
+
+            CrittersDisplay.ForEach(c =>
             {
-                CrittersDisplay.ForEach(c =>
-                {
-                    c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
-                    c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
-                });
+                c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+            });
 
-                CalculatingSimilarities(Critters.ToList());
+            CalculatingSimilarities(Critters.ToList());
 
+            Task.Run(() =>
+            {
                 var dnas = SelectionCriteria();
 
                 Reset();
@@ -316,8 +335,16 @@ namespace NeurBox
                     c.GridSize = GridSize;
                     c.World = this;
                 });
-                Spawn(false);
-            }
+                Spawn();
+            }).ContinueWith(_ =>
+            {
+                Dispatcher.Invoke(ReuseCritterDisplay);
+
+                simulationRunner = new Thread(SimulationThread);
+                simulationRunner.IsBackground = true;
+                simulationRunner.Start();
+                dispatcherTimer.Start();
+            });
         }
 
         private List<string> SelectionCriteria()
@@ -325,7 +352,7 @@ namespace NeurBox
             if (SelectionFunction != null)
                 Critters.RemoveAll(SelectionFunction);
             SurvivalRate = (double)Critters.Count / (double)NumberCritter;
-            GenerationSurvivalEvent?.Invoke(this, SurvivalRate);
+            Dispatcher.BeginInvoke(() => GenerationSurvivalEvent?.Invoke(this, SurvivalRate));
             var dnas = Critters.Select(row => row.DNA).ToList();
             return dnas;
         }
@@ -338,6 +365,12 @@ namespace NeurBox
             simulationTime = 0;
             Generation = 0;
             SimulationMustRun = true;
+
+            PaintSafeArea();
+            ResetDisplay();
+            Reset();
+            Spawn();
+            CreateCritterDisplay();
 
             TimeWatch = new Stopwatch();
             TimeWatch.Start();

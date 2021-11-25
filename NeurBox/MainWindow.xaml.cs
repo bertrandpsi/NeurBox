@@ -91,6 +91,9 @@ return (d < 20);";
                 worldGrid.Stop();
                 statusSimultation.Text = "Status: Idle";
                 toolRun.Content = "Run";
+
+                while (worldGrid.SimulationRunning)
+                    System.Threading.Thread.Sleep(100);
                 return;
             }
 
@@ -134,7 +137,6 @@ public static class EvalClass
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
             survivalPlot.Refresh();
 
-
             worldGrid.LifeSpan = simulationSettings.LifeSpan;
             worldGrid.InternalNeurons = simulationSettings.InternalNeurons;
             worldGrid.NetworkConnections = simulationSettings.NetworkConnections;
@@ -144,12 +146,6 @@ public static class EvalClass
             worldGrid.MinReproductionFactor = Math.Min(1, Math.Max(0, simulationSettings.MinReproductionFactor));
             worldGrid.DnaMixing = simulationSettings.DnaMixing;
 
-            worldGrid.PaintSafeArea();
-
-            while (worldGrid.SimulationRunning)
-                System.Threading.Thread.Sleep(100);
-            worldGrid.Reset();
-            worldGrid.Spawn();
             worldGrid.Start();
         }
     }
