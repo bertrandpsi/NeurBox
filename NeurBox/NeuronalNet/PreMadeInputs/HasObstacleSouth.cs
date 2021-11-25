@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace NeurBox.NeuronalNet.PreMadeInputs
+﻿namespace NeurBox.NeuronalNet.PreMadeInputs
 {
     internal class HasObstacleSouth : InputNeuron
     {

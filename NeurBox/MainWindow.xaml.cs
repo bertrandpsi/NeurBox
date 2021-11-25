@@ -1,14 +1,5 @@
-﻿using NeurBox.NeuronalNet;
-using ScottPlot.Plottable;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using ScottPlot.Plottable;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace NeurBox
 {
