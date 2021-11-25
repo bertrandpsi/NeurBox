@@ -350,6 +350,7 @@ namespace NeurBox
                 catch
                 {
                     SimulationMustRun = false;
+                    Stop();
                 }
             });
         }
