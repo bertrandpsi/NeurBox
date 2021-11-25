@@ -2,23 +2,29 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.Loader;
 
 namespace NeurBox
 {
     // Taken from https://laurentkempe.com/2019/02/18/dynamically-compile-and-run-code-using-dotNET-Core-3.0/
-    internal static class CSParsing
+    public static class CSParsing
     {
-        /*public static MetadataReference MetadataReferenceFromAssembly(Assembly assembly)
+        public class SimpleUnloadableAssemblyLoadContext : AssemblyLoadContext
         {
-            return MetadataReference.CreateFromImage((byte[])(assembly.GetType().GetMethod("GetRawBytes", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(assembly,null)));
-        }*/
+            public SimpleUnloadableAssemblyLoadContext()
+                : base(true)
+            {
+            }
+
+            protected override Assembly Load(AssemblyName assemblyName)
+            {
+                return null;
+            }
+        }
 
         public static CSharpCompilation GenerateCode(string sourceCode)
         {

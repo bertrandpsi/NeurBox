@@ -2,17 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace NeurBox
@@ -28,6 +21,8 @@ namespace NeurBox
         bool SimulationMustRun = true;
 
         public event EventHandler<double> GenerationSurvivalEvent;
+
+        public bool SimulationRunning => SimulationMustRun || simulationRunner != null;
 
         public WorldGrid()
         {
@@ -45,6 +40,7 @@ namespace NeurBox
         public int GridSize { get; internal set; }
         public int NumberCritter { get; set; }
         List<Critter> Critters { get; set; } = new List<Critter>();
+        List<CritterDisplay> CrittersDisplay { get; set; } = new List<CritterDisplay>();
         public Predicate<Critter> SelectionFunction;
 
         public int[,] Grid;
@@ -96,9 +92,10 @@ namespace NeurBox
         internal void Reset()
         {
             simulationTime = 0;
-            var toClear = worldCanvas.Children.OfType<Critter>().ToList();
+            var toClear = worldCanvas.Children.OfType<CritterDisplay>().ToList();
             toClear.ForEach(critter => worldCanvas.Children.Remove(critter));
             Critters.Clear();
+            CrittersDisplay.Clear();
             Grid = new int[GridSize, GridSize];
             for (int i = 0; i < GridSize; i++)
                 for (int j = 0; j < GridSize; j++)
@@ -119,7 +116,6 @@ namespace NeurBox
             // Generate some random Critter
             Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
             {
-                Id = cId,
                 MaxLifeSpan = LifeSpan,
                 InternalNeurons = InternalNeurons,
                 NetworkConnections = NetworkConnections,
@@ -142,10 +138,12 @@ namespace NeurBox
             // Place the critter on the screen
             Critters.ForEach(c =>
             {
-                c.CalculateColor();
-                worldCanvas.Children.Add(c);
-                c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
-                c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                var d = new CritterDisplay { Critter = c };
+                d.CalculateColor();
+                worldCanvas.Children.Add(d);
+                d.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                d.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                CrittersDisplay.Add(d);
             });
         }
 
@@ -199,7 +197,7 @@ namespace NeurBox
 
             lock (Critters)
             {
-                Critters.ForEach(c =>
+                CrittersDisplay.ForEach(c =>
                 {
                     c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
                     c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
@@ -253,7 +251,7 @@ namespace NeurBox
         }
 
         bool isCalculatingSimilarities = false;
-        private object topMostLock=new object();
+        private object topMostLock = new object();
 
         void CalculatingSimilarities(List<Critter> critters)
         {
@@ -263,7 +261,11 @@ namespace NeurBox
             // In a background thread as it's really slow to check all the permutations
             Task.Run(() =>
             {
-                var allCouples = AllCouplePermutations(critters).Select(couple => new { Couple = couple, Similarity = couple.Item1.CompareDNA(couple.Item2) }).ToList();
+                var allCouples = AllCouplePermutations(critters).Select(couple => new
+                {
+                    Couple = couple,
+                    Similarity = couple.Item1.CompareDNA(couple.Item2),
+                }).ToList();
                 DNASimilarity = allCouples.Average(row => row.Similarity);
                 lock (topMostLock)
                 {
@@ -279,7 +281,7 @@ namespace NeurBox
             TimePerGeneration = TimeWatch.Elapsed / Generation;
             lock (Critters)
             {
-                Critters.ForEach(c =>
+                CrittersDisplay.ForEach(c =>
                 {
                     c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
                     c.SetValue(Canvas.TopProperty, (double)c.Y * 4);

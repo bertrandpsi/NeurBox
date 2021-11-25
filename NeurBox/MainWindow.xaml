@@ -16,49 +16,12 @@
         </Grid.RowDefinitions>
         <ToolBarPanel Grid.Row="0" >
             <ToolBar ToolBarTray.IsLocked="True">
-                <Button Click="Start_Click" x:Name="toolRun" Content="Run"/>
+                <Button Click="StartStop" x:Name="toolRun" Content="Run"/>
             </ToolBar>
         </ToolBarPanel>
         <TabControl Grid.Row="1" x:Name="mainTabControl">
             <TabItem Header="Help">
-                <ScrollViewer>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel.Resources>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Margin" Value="5" />
-                                <Setter Property="TextWrapping" Value="Wrap" />
-                                <Setter Property="TextAlignment" Value="Justify" />
-                                <Setter Property="FontSize" Value="14" />
-                            </Style>
-                        </StackPanel.Resources>
-                        <TextBlock FontWeight="Bold" FontSize="18">Goal of the tool:</TextBlock>
-                        <TextBlock>
-The goal of this tool is to investigate how simple neuronal network learn and work.
-                        </TextBlock>
-                        <TextBlock FontWeight="Bold" FontSize="18">How to start:</TextBlock>
-                        <TextBlock>
-Select the "Simulation" tab, and press the "Run" button on top. The tool shows the simulation state at the end of each generation run,
-as well as some statistics. At the bottom of the simultation tab it is possible to see the graph of the survival rate over time.
-                        </TextBlock>
-                        <TextBlock>
-                        At any time it is possible to switch in "real time view" which will greatly slow down the simulation but will display how the critters move around the world.
-                        </TextBlock>
-                        <TextBlock FontWeight="Bold" FontSize="18">Type of neuronal network:</TextBlock>
-                        <TextBlock>
-We use simply genetic algorithm (which can be tweaked by the parameters) to keep the networks (or critters) which do fit the requirements. Each generation will spawn new critter based on the parents or fully random.
-                        </TextBlock>
-                        <TextBlock FontWeight="Bold" FontSize="18">Scripts:</TextBlock>
-                        <TextBlock>
-Currently it is just possible to define your own selection selection criteria by filling the script area with a valid C# code.
-                        </TextBlock>
-                        <TextBlock FontWeight="Bold" FontSize="18">Author:</TextBlock>
-                        <TextBlock>
-This software has been written by Alain Bertrand (c) 2021. The base idea / concept is from: <Hyperlink RequestNavigate="HandleLinkClick" NavigateUri="https://www.youtube.com/watch?v=N3tRFayqVtk">Davidran Dallmiller</Hyperlink>
-                        </TextBlock>
-
-
-                    </StackPanel>
-                </ScrollViewer>
+                <local:HelpContent />
             </TabItem>
             <TabItem Header="Simulation" x:Name="simultationTab">
                 <Grid>
@@ -76,91 +39,7 @@ This software has been written by Alain Bertrand (c) 2021. The base idea / conce
                             <local:WorldGrid Width="400" Height="400" x:Name="worldGrid"/>
                         </Viewbox>
                     </Border>
-                    <ScrollViewer Grid.Column="1" Grid.Row="0">
-                        <Grid x:Name="parameterGrid">
-                            <Grid.Resources>
-                                <Style TargetType="Label">
-                                    <Setter Property="VerticalAlignment" Value="Center" />
-                                    <Setter Property="FontWeight" Value="Bold" />
-                                </Style>
-                                <Style TargetType="TextBox">
-                                    <Setter Property="Padding" Value="5" />
-                                    <Setter Property="Margin" Value="5" />
-                                </Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Padding" Value="5" />
-                                    <Setter Property="Margin" Value="5" />
-                                </Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Padding" Value="5" />
-                                    <Setter Property="Margin" Value="5" />
-                                </Style>
-                            </Grid.Resources>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="Auto" />
-                            </Grid.RowDefinitions>
-                            <Label Grid.Row="0" Grid.Column="0">Grid Size:</Label>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding GridSize}" />
-
-                            <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
-                            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
-
-                            <Label Grid.Row="2" Grid.Column="0">Neuron Connections:</Label>
-                            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
-
-                            <Label Grid.Row="3" Grid.Column="0">Internal Neurons:</Label>
-                            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
-
-                            <Label Grid.Row="4" Grid.Column="0">Life Span:</Label>
-                            <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
-
-                            <Label Grid.Row="5" Grid.Column="0">DNA Mixing:</Label>
-                            <CheckBox Grid.Row="5" Grid.Column="1" x:Name="dnaCheckBox" IsChecked="{Binding DnaMixing}"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" />
-
-                            <Label Grid.Row="6" Grid.Column="0">Mutation Rate:</Label>
-                            <TextBox Grid.Row="6" Grid.Column="1"  Text="{Binding MutationRate}"  />
-
-                            <Label Grid.Row="7" Grid.Column="0">Min Reproduction Factor:</Label>
-                            <TextBox Grid.Row="7" Grid.Column="1"  Text="{Binding MinReproductionFactor}"  />
-
-                            <Label Grid.Row="8" Grid.Column="0">Realtime:</Label>
-                            <CheckBox Grid.Row="8" Grid.Column="1" IsChecked="{Binding InRealTime}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"  />
-
-                            <Label Grid.Row="9" Grid.Column="0">Generation:</Label>
-                            <TextBlock Grid.Row="9" Grid.Column="1" x:Name="generation"  />
-
-                            <Label Grid.Row="10" Grid.Column="0">Survival Rate:</Label>
-                            <TextBlock Grid.Row="10" Grid.Column="1" x:Name="survival"  />
-
-                            <Label Grid.Row="11" Grid.Column="0">Time Per Generation:</Label>
-                            <TextBlock Grid.Row="11" Grid.Column="1" x:Name="timePerGeneration"  />
-
-                            <Label Grid.Row="12" Grid.Column="0">Genetic Similarities:</Label>
-                            <TextBlock Grid.Row="12" Grid.Column="1" x:Name="geneticSimilarities"  />
-
-                            <StackPanel Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="2">
-                                <Button Content="Start" Click="Start_Click" x:Name="startButton" />
-                            </StackPanel>
-                        </Grid>
-                    </ScrollViewer>
+                    <local:SimulationSettings Grid.Column="1" Grid.Row="0" x:Name="simulationSettings"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Scripting">
@@ -189,32 +68,7 @@ This software has been written by Alain Bertrand (c) 2021. The base idea / conce
                 </ScrollViewer>
             </TabItem>
             <TabItem Header="Neuronal Network">
-                <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
-                    <StackPanel x:Name="networkPreview">
-                        <StackPanel.Resources>
-                            <Style TargetType="Line">
-                                <Setter Property="Stroke" Value="blue" />
-                                <Setter Property="StrokeThickness" Value="2" />
-                            </Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="FontSize" Value="14" />
-                                <Setter Property="Width" Value="60" />
-                                <Setter Property="TextWrapping" Value="Wrap" />
-                                <Setter Property="TextAlignment" Value="Center" />
-                                <Setter Property="VerticalAlignment" Value="Center" />
-                            </Style>
-                            <Style TargetType="Grid">
-                                <Setter Property="Width" Value="70" />
-                                <Setter Property="Height" Value="70" />
-                            </Style>
-                            <Style TargetType="Ellipse">
-                                <Setter Property="Stroke" Value="Black" />
-                                <Setter Property="StrokeThickness" Value="1" />
-                                <Setter Property="Fill" Value="White" />
-                            </Style>
-                        </StackPanel.Resources>
-                    </StackPanel>
-                </ScrollViewer>
+                <local:NeuronalNetworkViewer x:Name="networkPreview" />
             </TabItem>
         </TabControl>
         <StatusBar Grid.Row="2">

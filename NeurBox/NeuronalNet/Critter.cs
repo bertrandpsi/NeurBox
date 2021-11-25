@@ -3,32 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace NeurBox
 {
-    /// <summary>
-    /// Interaction logic for Critter.xaml
-    /// </summary>
-    public partial class Critter : UserControl
+    public class Critter
     {
         static SemaphoreSlim gridMovement = new SemaphoreSlim(1);
-
-        public Critter()
-        {
-            InitializeComponent();
-        }
 
         public int MaxLifeSpan { get; internal set; }
         public int LifeSpan { get; internal set; } = 0;
@@ -49,7 +30,7 @@ namespace NeurBox
 
         static Critter()
         {
-            inputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(InputNeuron))).Select(t=> t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())).ToList();
+            inputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(InputNeuron))).Select(t => t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())).ToList();
             outputs = Assembly.GetExecutingAssembly().GetTypes().Where(row => row.IsSubclassOf(typeof(OutputNeuron))).Select(t => t.GetConstructor(BindingFlags.Public | BindingFlags.Instance, Array.Empty<Type>())).ToList();
         }
 
@@ -80,21 +61,6 @@ namespace NeurBox
                     i++;
                 }
             }
-        }
-
-        Color ColorFromString(string src)
-        {
-            var hash = src.Substring(0, 6).GetHashCode();
-            var r = Math.Min(255, (hash % 250) * 2.2);
-            var g = Math.Min(255, ((hash / 250) % 250) * 2.2);
-            var b = Math.Min(255, ((hash / (250 * 250)) % 250) * 2.2);
-            return Color.FromRgb((byte)r, (byte)g, (byte)b);
-        }
-
-        public void CalculateColor()
-        {
-            var colors = DNA.Split(' ').Skip(1).Select(d => ColorFromString(d));
-            dot.Fill = new SolidColorBrush(Color.FromRgb((byte)colors.Average(c => c.R), (byte)colors.Average(c => c.G), (byte)colors.Average(c => c.B)));
         }
 
         IEnumerable<(TTypeA, TTypeB)> Mix<TTypeA, TTypeB>(IEnumerable<TTypeA> a, IEnumerable<TTypeB> b)
