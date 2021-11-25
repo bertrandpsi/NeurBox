@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using NeurBox.Utilities;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
@@ -230,23 +231,6 @@ namespace NeurBox
             return result;
         }
 
-        IEnumerable<(TType, TType)> AllCouplePermutations<TType>(List<TType> source)
-        {
-            var alreadyChecked = new Dictionary<(int, int), bool>();
-            for (int i = 0; i < source.Count; i++)
-            {
-                for (int j = 0; j < source.Count; j++)
-                {
-                    if (i == j)
-                        continue;
-                    if (alreadyChecked.ContainsKey((i, j)) || alreadyChecked.ContainsKey((j, i)))
-                        continue;
-                    alreadyChecked.Add((i, j), true);
-                    yield return (source[i], source[j]);
-                }
-            }
-        }
-
         bool isCalculatingSimilarities = false;
         private object topMostLock = new object();
 
@@ -258,7 +242,7 @@ namespace NeurBox
             // In a background thread as it's really slow to check all the permutations
             Task.Run(() =>
             {
-                var allCouples = AllCouplePermutations(critters).Select(couple => new
+                var allCouples = critters.AllCouplePermutations().Select(couple => new
                 {
                     Couple = couple,
                     Similarity = couple.Item1.CompareDNA(couple.Item2),

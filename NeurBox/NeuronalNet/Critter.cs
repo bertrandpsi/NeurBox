@@ -1,4 +1,5 @@
 ﻿using NeurBox.NeuronalNet;
+using NeurBox.Utilities;
 using System.Reflection;
 using System.Threading;
 
@@ -60,19 +61,9 @@ namespace NeurBox
             }
         }
 
-        IEnumerable<(TTypeA, TTypeB)> Mix<TTypeA, TTypeB>(IEnumerable<TTypeA> a, IEnumerable<TTypeB> b)
-        {
-            var enumerator = b.GetEnumerator();
-            foreach (var av in a)
-            {
-                enumerator.MoveNext();
-                yield return (av, enumerator.Current);
-            }
-        }
-
         public double CompareDNA(Critter other)
         {
-            return Mix(DNA.Split(' ').Skip(1), other.DNA.Split(' ').Skip(1)).Average(genome => CompareGenome(genome.Item1, genome.Item2));
+            return DNA.Split(' ').Skip(1).Mix(other.DNA.Split(' ').Skip(1)).Average(genome => CompareGenome(genome.Item1, genome.Item2));
         }
 
         double CompareGenome(string a, string b)
