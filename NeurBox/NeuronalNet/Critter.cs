@@ -61,9 +61,11 @@ namespace NeurBox
             }
         }
 
+        public string NeuronsInUse => string.Join("", Neurons.SelectMany(row => row.Connections.Select(c => c.From.Position.ToString("X03") + c.To.Position.ToString("X03"))).OrderBy(row => row));
+
         public double CompareDNA(Critter other)
         {
-            return DNA.Split(' ').Skip(1).Mix(other.DNA.Split(' ').Skip(1)).Average(genome => CompareGenome(genome.Item1, genome.Item2));
+            return DNA.Split(' ').Skip(1).OrderBy(row=>row).Mix(other.DNA.Split(' ').Skip(1).OrderBy(row => row)).Average(genome => CompareGenome(genome.Item1, genome.Item2));
         }
 
         double CompareGenome(string a, string b)
@@ -75,7 +77,7 @@ namespace NeurBox
                 var va = (int.Parse(a.Substring(6), System.Globalization.NumberStyles.HexNumber) - 4000.0) / 4000.0;
                 var vb = (int.Parse(a.Substring(6), System.Globalization.NumberStyles.HexNumber) - 4000.0) / 4000.0;
                 //return 0.75 + Math.Max(0, Math.Min(1, 1 - Math.Abs(va - vb))) / 4.0;
-                return 0.75 + (Neuron.InRange(Math.Abs(va - vb)) + 1) / 8.0;
+                return 0.8 + (Neuron.InRange(Math.Abs(va - vb)) + 1) / 5.0;
             }
             return 0;
         }

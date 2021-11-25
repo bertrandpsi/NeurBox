@@ -60,8 +60,7 @@ namespace NeurBox
 
         private void startButton_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.StartStop(sender, e);
-
+            MainWindow?.StartStop(sender, e);
         }
     }
 }

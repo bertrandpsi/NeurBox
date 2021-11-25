@@ -17,15 +17,15 @@ namespace NeurBox
             InitializeComponent();
         }
 
-        internal void Render(List<Critter> topMostUsed)
+        internal void Render(List<WorldGrid.TopUsage> topMostUsed)
         {
             networkPreview.Children.Clear();
             var pos = 0;
             foreach (var t in topMostUsed.ToList())
             {
-                var title = new TextBlock { Text = "Position " + (pos + 1), Width = double.NaN, TextAlignment = TextAlignment.Left, FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(20) };
+                var title = new TextBlock { Text = "Position " + (pos + 1) + " - " + (t.Frequency * 100).ToString("F2") + "%", Width = double.NaN, TextAlignment = TextAlignment.Left, FontSize = 20, FontWeight = FontWeights.Bold, Margin = new Thickness(20) };
                 networkPreview.Children.Add(title);
-                networkPreview.Children.Add(DrawNeuronalNet(t));
+                networkPreview.Children.Add(DrawNeuronalNet(t.Specimen));
                 pos++;
             }
         }

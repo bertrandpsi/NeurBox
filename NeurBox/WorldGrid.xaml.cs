@@ -16,7 +16,7 @@ namespace NeurBox
         public static Random Random = new Random();
         System.Windows.Threading.DispatcherTimer dispatcherTimer;
         Thread? simulationRunner;
-        bool SimulationMustRun = true;
+        bool SimulationMustRun = false;
 
         public event EventHandler<double> GenerationSurvivalEvent;
 
@@ -50,8 +50,8 @@ namespace NeurBox
         public TimeSpan TimePerGeneration { get; private set; }
         public bool DnaMixing { get; internal set; }
         public double DNASimilarity { get; private set; }
-        List<Critter> topMostUsed = new List<Critter>();
-        public List<Critter> TopMostUsed
+        List<TopUsage> topMostUsed = new List<TopUsage>();
+        public List<TopUsage> TopMostUsed
         {
             get
             {
@@ -109,7 +109,16 @@ namespace NeurBox
             dispatcherTimer.Stop();
         }
 
-        internal void Spawn()
+        internal void Spawn(bool mustLock = true)
+        {
+            if (mustLock)
+                lock (Critters)
+                    UnsafeSpawn();
+            else
+                UnsafeSpawn();
+        }
+
+        private void UnsafeSpawn()
         {
             // Generate some random Critter
             Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
@@ -215,10 +224,11 @@ namespace NeurBox
                     result.Add(a);
                 else
                 {
-                    var pa = a.Split(' ');
-                    var pb = b.Split(' ');
+                    var pa = a.Split(' ').Skip(1).OrderBy(row => row).ToList();
+                    var pb = b.Split(' ').Skip(1).OrderBy(row => row).ToList();
                     var genes = new List<string>();
-                    for (int j = 0; j < pa.Length; j++)
+                    genes.Add(InternalNeurons.ToString("X03"));
+                    for (int j = 0; j < pa.Count; j++)
                     {
                         if (Random.Next(2) == 0)
                             genes.Add(pa[j]);
@@ -234,6 +244,14 @@ namespace NeurBox
         bool isCalculatingSimilarities = false;
         private object topMostLock = new object();
 
+        public class TopUsage
+        {
+            public int NbFound { get; set; }
+            public Critter Specimen { get; set; }
+            public double Frequency { get; set; }
+        }
+
+
         void CalculatingSimilarities(List<Critter> critters)
         {
             if (isCalculatingSimilarities)
@@ -248,9 +266,18 @@ namespace NeurBox
                     Similarity = couple.Item1.CompareDNA(couple.Item2),
                 }).ToList();
                 DNASimilarity = allCouples.Average(row => row.Similarity);
+                var totSpecimens = critters.Count;
+
                 lock (topMostLock)
                 {
-                    TopMostUsed = allCouples.OrderByDescending(row => row.Similarity).Take(3).Select(row => row.Couple.Item1).ToList();
+                    TopMostUsed = critters.GroupBy(row => row.NeuronsInUse).Select(row => new TopUsage
+                    {
+                        NbFound = row.Count(),
+                        Frequency = (double)row.Count() / totSpecimens,
+                        Specimen = row.First()
+                    })
+                    .OrderByDescending(row => row.NbFound)
+                    .ToList();
                 }
                 isCalculatingSimilarities = false;
             });
@@ -289,7 +316,7 @@ namespace NeurBox
                     c.GridSize = GridSize;
                     c.World = this;
                 });
-                Spawn();
+                Spawn(false);
             }
         }
 

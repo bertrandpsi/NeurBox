@@ -53,6 +53,7 @@ return (d < 20);";
             survivalPlot.Plot.Legend();
             survivalPlot.Plot.Add(signalPlot);
             survivalPlot.Refresh();
+            simulationSettings.MainWindow = this;
 
             // Pre-run the code parsing to speed up on run
             var w = CSParsing.LoadAndExecute(@"using NeurBox; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
@@ -84,8 +85,9 @@ return (d < 20);";
         WeakReference weakReference = null;
         public void StartStop(object sender, RoutedEventArgs e)
         {
-            if (!WorldGrid.SimulationRunning)
+            if (worldGrid.SimulationRunning)
             {
+                simulationSettings.SimulationIdle();
                 worldGrid.Stop();
                 statusSimultation.Text = "Status: Idle";
                 toolRun.Content = "Run";
@@ -144,6 +146,8 @@ public static class EvalClass
 
             worldGrid.PaintSafeArea();
 
+            while (worldGrid.SimulationRunning)
+                System.Threading.Thread.Sleep(100);
             worldGrid.Reset();
             worldGrid.Spawn();
             worldGrid.Start();
