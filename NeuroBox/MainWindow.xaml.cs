@@ -81,7 +81,7 @@ return false;
             simulationSettings.MainWindow = this;
 
             // Pre-run the code parsing to speed up on run
-            var w = CSParsing.LoadAndExecute(@"using NeuroBox; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
+            var w = CSParsing.LoadAndExecute(@"using NeuroBox;using NeuroBox.NeuronalNet; using System; public static class EvalClass { public static bool EvalFunction(Critter critter) { return true; } } ");
             var assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)w.Target).Assemblies.First();
             var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             method.Invoke(null, new object[] { null });
@@ -140,7 +140,7 @@ return false;
 
             try
             {
-                weakReference[0] = CSParsing.LoadAndExecute("using NeuroBox;using System;public static class EvalClass{ public static bool EvalFunction(Critter critter){" + SelectionCondition + "}}");
+                weakReference[0] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System;public static class EvalClass{ public static bool EvalFunction(Critter critter){" + SelectionCondition + "}}");
             }
             catch (Exception ex)
             {
@@ -154,7 +154,7 @@ return false;
 
             try
             {
-                weakReference[1] = CSParsing.LoadAndExecute("using NeuroBox;using System; public static class EvalSpawnClass { public static (int,int) EvalFunction(Random rnd, WorldGrid worldGrid) {" + SpawnCoordinate + "}}");
+                weakReference[1] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System; public static class EvalSpawnClass { public static (int,int) EvalFunction(Random rnd, WorldGrid worldGrid) {" + SpawnCoordinate + "}}");
             }
             catch (Exception ex)
             {
@@ -168,7 +168,7 @@ return false;
 
             try
             {
-                weakReference[2] = CSParsing.LoadAndExecute("using NeuroBox;using System; public static class EvalBlockingClass { public static bool EvalFunction(int x, int y, Random rnd) {" + WorldBlocking + "}}");
+                weakReference[2] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System; public static class EvalBlockingClass { public static bool EvalFunction(int x, int y, Random rnd) {" + WorldBlocking + "}}");
             }
             catch (Exception ex)
             {

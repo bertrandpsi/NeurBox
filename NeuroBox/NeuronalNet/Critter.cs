@@ -1,9 +1,8 @@
-﻿using NeuroBox.NeuronalNet;
-using NeuroBox.Utilities;
+﻿using NeuroBox.Utilities;
 using System.Reflection;
 using System.Threading;
 
-namespace NeuroBox
+namespace NeuroBox.NeuronalNet
 {
     public class Critter
     {
@@ -38,8 +37,8 @@ namespace NeuroBox
             {
                 // Creates all the neurons
                 Neurons.AddRange(inputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
-                Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
                 Neurons.AddRange(Enumerable.Range(0, InternalNeurons).Select(_ => new InternalNeuron()));
+                Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
                 Neurons.ForEach(n => n.Critter = this);
             }
 
@@ -137,8 +136,8 @@ namespace NeuroBox
             result.InternalNeurons = int.Parse(dnaConnections[0], System.Globalization.NumberStyles.HexNumber);
 
             result.Neurons.AddRange(inputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
-            result.Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
             result.Neurons.AddRange(Enumerable.Range(0, result.InternalNeurons).Select(_ => new InternalNeuron()));
+            result.Neurons.AddRange(outputs.Select(t => (Neuron)t.Invoke(Array.Empty<object>())));
             result.Neurons.ForEach(n => n.Critter = result);
 
             foreach (var d in dnaConnections.Skip(1))

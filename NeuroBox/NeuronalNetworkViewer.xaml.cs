@@ -132,7 +132,7 @@ namespace NeuroBox
             return canvas;
         }
 
-        static Regex titleExp = new Regex("([a-z])([A-Z])");
+        static Regex titleExp = new Regex("([a-z])([A-Z]|[0-9])");
         private string TypeTitle(object o) => titleExp.Replace(o.GetType().Name, "$1 $2");
     }
 }

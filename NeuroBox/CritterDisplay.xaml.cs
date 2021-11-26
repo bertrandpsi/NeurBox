@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using NeuroBox.NeuronalNet;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace NeuroBox

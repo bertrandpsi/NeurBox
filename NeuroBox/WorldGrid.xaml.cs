@@ -1,4 +1,5 @@
-﻿using NeuroBox.Utilities;
+﻿using NeuroBox.NeuronalNet;
+using NeuroBox.Utilities;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -378,7 +379,7 @@ namespace NeuroBox
                     simulationRunner.Start();
                     dispatcherTimer.Start();
                 }
-                catch (Exception ex)
+                catch
                 {
                     SimulationMustRun = false;
                     Stop();
