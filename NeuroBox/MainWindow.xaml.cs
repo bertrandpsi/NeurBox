@@ -49,6 +49,19 @@ return (d < 20);";
 return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
 ";
 
+        public string WorldBlocking { get; set; } = @"
+// You may re-use any of those code to change the selection or write your own
+
+// Place some random blocks
+// return rnd.NextDouble() < 0.05;
+
+// Place a wall at X 30 and X 70 with an hole at around Y 30
+// return ((x>28 && x<32) || (x>68 && x<72))  && (y < 25 || y > 35);
+
+// All empty
+return false;
+";
+
         public WorldGrid WorldGrid => worldGrid;
 
         public MainWindow()
@@ -94,7 +107,7 @@ return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
 
         }
 
-        WeakReference[] weakReference = new WeakReference[] { null, null };
+        WeakReference[] weakReference = new WeakReference[] { null, null, null };
         public void StartStop(object sender, RoutedEventArgs e)
         {
             if (worldGrid.SimulationRunning)
@@ -152,6 +165,20 @@ return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
             assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[1].Target).Assemblies.First();
             var method2 = assembly.GetType("EvalSpawnClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             worldGrid.SpawnCoordinateFunction = (worldGrid) => ((int, int))method2.Invoke(null, new object[] { WorldGrid.Random, worldGrid });
+
+            try
+            {
+                weakReference[2] = CSParsing.LoadAndExecute("using NeuroBox;using System; public static class EvalBlockingClass { public static bool EvalFunction(int x, int y, Random rnd) {" + WorldBlocking + "}}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error in the Spawn code");
+                return;
+            }
+
+            assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[2].Target).Assemblies.First();
+            var method3 = assembly.GetType("EvalBlockingClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            worldGrid.WorldBlockingFunction = (x, y, rnd) => (bool)method3.Invoke(null, new object[] { x, y, rnd });
 
             signalPlot.Clear();
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());

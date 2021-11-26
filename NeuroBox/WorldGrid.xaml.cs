@@ -65,12 +65,14 @@ namespace NeuroBox
             }
         }
         public double MinReproductionFactor { get; set; }
+        public Func<int, int, Random, bool> WorldBlockingFunction { get; set; }
 
         public void PaintSafeArea()
         {
             worldCanvas.Children.Clear();
             var critter = new Critter { X = 0, Y = 0 };
             var fill = new SolidColorBrush(Color.FromRgb(180, 255, 180));
+            var fillBlock = new SolidColorBrush(Color.FromRgb(140, 140, 140));
             for (int x = 0; x < GridSize; x += 2)
             {
                 for (int y = 0; y < GridSize; y += 2)
@@ -84,6 +86,13 @@ namespace NeuroBox
                         r.SetValue(Canvas.TopProperty, y * 4.0);
                         worldCanvas.Children.Add(r);
                     }
+                    if (WorldBlockingFunction(x, y, Random))
+                    {
+                        var r = new Rectangle { Width = 8.5, Height = 8.5, Fill = fillBlock };
+                        r.SetValue(Canvas.LeftProperty, x * 4.0);
+                        r.SetValue(Canvas.TopProperty, y * 4.0);
+                        worldCanvas.Children.Add(r);
+                    }
                 }
             }
         }
@@ -92,9 +101,23 @@ namespace NeuroBox
         {
             simulationTime = 0;
             Grid = new int[GridSize, GridSize];
-            for (int i = 0; i < GridSize; i++)
-                for (int j = 0; j < GridSize; j++)
-                    Grid[i, j] = -1;
+            for (int i = 0; i < GridSize; i += 2)
+            {
+                for (int j = 0; j < GridSize; j += 2)
+                {
+                    var b = WorldBlockingFunction(i, j, Random);
+                    for (int k = 0; k < 2; k++)
+                    {
+                        for (int l = 0; l < 2; l++)
+                        {
+                            if (b)
+                                Grid[i + k, j + l] = -2;
+                            else
+                                Grid[i + k, j + l] = -1;
+                        }
+                    }
+                }
+            }
 
             Critters.Clear();
         }

@@ -72,6 +72,10 @@
                         <TextBlock>The following function must returns a tupple of two int for a possible spwaning initial position of a critter.</TextBlock>
                         <Label>Spawn Coordinate Function:</Label>
                         <TextBox Text="{Binding SpawnCoordinate}"/>
+
+                        <TextBlock>The following function must returns True if the coordinate must be blocked.</TextBlock>
+                        <Label>Block Placing Function:</Label>
+                        <TextBox Text="{Binding WorldBlocking}"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
