@@ -40,6 +40,7 @@ namespace NeuroBox
         List<Critter> Critters { get; set; } = new List<Critter>();
         List<CritterDisplay> CrittersDisplay { get; set; } = new List<CritterDisplay>();
         public Predicate<Critter> SelectionFunction;
+        public Func<WorldGrid, (int, int)> SpawnCoordinateFunction;
 
         public int[,] Grid;
         int simulationTime = 0;
@@ -131,8 +132,9 @@ namespace NeuroBox
             {
                 do
                 {
-                    c.X = Random.Next(0, GridSize - 1);
-                    c.Y = Random.Next(0, GridSize - 1);
+                    var coord = SpawnCoordinateFunction(this);
+                    c.X = coord.Item1;
+                    c.Y = coord.Item2;
                 } while (Grid[c.X, c.Y] != -1);
                 Grid[c.X, c.Y] = 1;
                 c.Build();
@@ -155,7 +157,7 @@ namespace NeuroBox
 
         private void ReuseCritterDisplay()
         {
-            for(var i=0;i < Critters.Count;i++)
+            for (var i = 0; i < Critters.Count; i++)
             {
                 var c = Critters[i];
                 var d = CrittersDisplay[i];
@@ -183,11 +185,17 @@ namespace NeuroBox
                 if (simulationTime >= LifeSpan)
                 {
                     simulationRunner = null;
-                    Dispatcher.Invoke(() =>
+                    try
                     {
-                        NextGeneration();
-                        simulationTime = 0;
-                    });
+                        Dispatcher.Invoke(() =>
+                        {
+                            NextGeneration();
+                            simulationTime = 0;
+                        });
+                    }
+                    catch
+                    {
+                    }
                     return;
                 }
             }
@@ -347,7 +355,7 @@ namespace NeuroBox
                     simulationRunner.Start();
                     dispatcherTimer.Start();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     SimulationMustRun = false;
                     Stop();

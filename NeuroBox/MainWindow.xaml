@@ -53,17 +53,25 @@
                             <Setter Property="Padding" Value="5" />
                             <Setter Property="Margin" Value="5" />
                             <Setter Property="Height" Value="150" />
+                            <Setter Property="AcceptsReturn" Value="True" />
+                            <Setter Property="VerticalScrollBarVisibility" Value="Visible" />
                         </Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Padding" Value="5" />
                             <Setter Property="Background" Value="WhiteSmoke" />
+                            <Setter Property="TextAlignment" Value="Justify" />
+                            <Setter Property="TextWrapping" Value="Wrap" />
                             <Setter Property="Margin" Value="5" />
                         </Style>
                     </ScrollViewer.Resources>
                     <StackPanel>
-                        <TextBlock TextWrapping="Wrap" TextAlignment="Justify">The following function must return True if the critter can reproduce its DNA, otherwise it will be eliminated. The code is written in C#. The critter object contains an X and Y property.</TextBlock>
+                        <TextBlock>The following function must returns True if the critter can reproduce its DNA, otherwise it will be eliminated. The code is written in C#. The critter object contains an X and Y property.</TextBlock>
                         <Label>Survival Selection Function:</Label>
-                        <TextBox AcceptsReturn="True" VerticalScrollBarVisibility="Visible" Text="{Binding SelectionCondition}"/>
+                        <TextBox Text="{Binding SelectionCondition}"/>
+
+                        <TextBlock>The following function must returns a tupple of two int for a possible spwaning initial position of a critter.</TextBlock>
+                        <Label>Spawn Coordinate Function:</Label>
+                        <TextBox Text="{Binding SpawnCoordinate}"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

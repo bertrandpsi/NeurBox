@@ -49,9 +49,11 @@ namespace NeuroBox
             {
                 references = new MetadataReference[]
                 {
-                    MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
+                    MetadataReference.CreateFromFile(Path.GetDirectoryName(typeof(System.Runtime.GCSettings).Assembly.Location)+"\\System.Runtime.dll"),
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                    MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
                     MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Random).Assembly.Location),
                 };
             }
 

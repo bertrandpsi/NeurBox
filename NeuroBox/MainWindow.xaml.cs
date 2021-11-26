@@ -37,6 +37,18 @@ var b = 50 - critter.Y;
 var d=Math.Sqrt(b * b + a * a);
 return (d < 20);";
 
+        public string SpawnCoordinate { get; set; } = @"
+// You may re-use any of those code to change the selection or write your own
+
+// Random position within a circle of 20 starting at 20,20 
+// var r = 20 * Math.Sqrt(rnd.NextDouble());
+// var theta = rnd.NextDouble() * 2.0 * Math.PI;
+// return ((int)(20 + r * Math.Cos(theta)),(int)(20 + r * Math.Sin(theta)));
+
+// Random position within the world grid
+return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
+";
+
         public WorldGrid WorldGrid => worldGrid;
 
         public MainWindow()
@@ -82,7 +94,7 @@ return (d < 20);";
 
         }
 
-        WeakReference weakReference = null;
+        WeakReference[] weakReference = new WeakReference[] { null, null };
         public void StartStop(object sender, RoutedEventArgs e)
         {
             if (worldGrid.SimulationRunning)
@@ -102,26 +114,20 @@ return (d < 20);";
             statusSimultation.Text = "Status: Running...";
             toolRun.Content = "Stop";
 
+            worldGrid.SelectionFunction = null;
+
             // Unload the previous weakReference
-            if (weakReference != null)
+            for (var i = 0; i < weakReference.Length; i++)
             {
-                worldGrid.SelectionFunction = null;
-                CSParsing.UnloadAssembly(weakReference);
-                weakReference = null;
+                if (weakReference[i] == null)
+                    continue;
+                CSParsing.UnloadAssembly(weakReference[i]);
+                weakReference[i] = null;
             }
 
             try
             {
-                weakReference = CSParsing.LoadAndExecute(@"using NeuroBox;
-using System;
-public static class EvalClass
-{
-    public static bool EvalFunction(Critter critter)
-{
-" + SelectionCondition + @"
-}
-}
-");
+                weakReference[0] = CSParsing.LoadAndExecute("using NeuroBox;using System;public static class EvalClass{ public static bool EvalFunction(Critter critter){" + SelectionCondition + "}}");
             }
             catch (Exception ex)
             {
@@ -129,9 +135,23 @@ public static class EvalClass
                 return;
             }
 
-            var assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference.Target).Assemblies.First();
-            var method = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            worldGrid.SelectionFunction = (critter) => !(bool)method.Invoke(null, new object[] { critter });
+            var assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[0].Target).Assemblies.First();
+            var method1 = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            worldGrid.SelectionFunction = (critter) => !(bool)method1.Invoke(null, new object[] { critter });
+
+            try
+            {
+                weakReference[1] = CSParsing.LoadAndExecute("using NeuroBox;using System; public static class EvalSpawnClass { public static (int,int) EvalFunction(Random rnd, WorldGrid worldGrid) {" + SpawnCoordinate + "}}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error in the Spawn code");
+                return;
+            }
+
+            assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[1].Target).Assemblies.First();
+            var method2 = assembly.GetType("EvalSpawnClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            worldGrid.SpawnCoordinateFunction = (worldGrid) => ((int, int))method2.Invoke(null, new object[] { WorldGrid.Random, worldGrid });
 
             signalPlot.Clear();
             survivalPlot.Plot.SetAxisLimits(signalPlot.GetAxisLimits());
