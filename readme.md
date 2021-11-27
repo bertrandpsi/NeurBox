@@ -1,6 +1,7 @@
 # NeuroBox
 
 This software is based on the youtube video [Davidran Dallmiller](https://www.youtube.com/watch?v=N3tRFayqVtk).
+You may find his own version on his [GitHub](https://github.com/davidrmiller/biosim4).
 
 The goal of the project is to have a neuronal network simulation playgroup. Being able to play with different
 parameters and conditions and see how the genetic algorithm reach a possible solution of the problem.
