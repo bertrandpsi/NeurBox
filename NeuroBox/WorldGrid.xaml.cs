@@ -420,6 +420,16 @@ namespace NeuroBox
             simulationRunner.Start();
             dispatcherTimer.Start();
         }
+
+        internal void Continue()
+        {
+            SimulationMustRun = true;
+            TimeWatch.Start();
+            simulationRunner = new Thread(SimulationThread);
+            simulationRunner.IsBackground = true;
+            simulationRunner.Start();
+            dispatcherTimer.Start();
+        }
     }
 }
 

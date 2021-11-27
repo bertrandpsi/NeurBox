@@ -13,11 +13,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Page Remove="icons\play.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="icons\briefcase_icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="icons\briefcase.png" />
+    <Resource Include="icons\play.xaml" />
   </ItemGroup>
 
   <ItemGroup>

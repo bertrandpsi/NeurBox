@@ -22,7 +22,7 @@ The goal of this tool is to investigate how simple neuronal network learn and wo
             </TextBlock>
             <TextBlock FontWeight="Bold" FontSize="18">How to start:</TextBlock>
             <TextBlock>
-Select the "Simulation" tab, and press the "Run" button on top. The tool shows the simulation state at the end of each generation run,
+Simply press the "Run" button on top. The tool shows the simulation state at the end of each generation run,
 as well as some statistics. At the bottom of the simultation tab it is possible to see the graph of the survival rate over time.
             </TextBlock>
             <TextBlock>

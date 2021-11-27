@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This file is NOT compatible with Silverlight-->
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" Stretch="Uniform">
+  <Canvas Name="svg2224" Width="512" Height="512">
+    <Canvas.RenderTransform>
+      <TranslateTransform X="0" Y="0"/>
+    </Canvas.RenderTransform>
+    <Canvas.Resources/>
+    <!--Unknown tag: sodipodi:namedview-->
+        <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path2222" StrokeThickness="29.4341" Stroke="Black" Fill="#FF4D9DE5" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+      <Path.Data>
+        <PathGeometry Figures="m 352.9512 55.335717 a 29.434094 29.434094 0 0 0 -20.81543 -8.61867 H 89.230916 A 42.504671 42.504671 0 0 0 46.717047 89.230916 V 386.8464 a 42.504671 42.504671 0 0 0 42.513869 42.51387 H 386.8464 A 42.642643 42.642643 0 0 0 429.36027 386.8464 V 143.94154 A 29.434094 29.434094 0 0 0 420.7416 123.12611 Z M 238.03866 385.20913 a 58.868188 58.868188 0 1 1 58.86818 -58.86819 58.794602 58.794602 0 0 1 -58.86818 58.86819 z M 282.1898 179.17047 H 105.58523 A 14.717047 14.717047 0 0 1 90.868187 164.45342 V 105.58523 A 14.717047 14.717047 0 0 1 105.58523 90.868187 H 282.1898 a 14.717047 14.717047 0 0 1 14.71704 14.717043 v 58.86819 a 14.717047 14.717047 0 0 1 -14.71704 14.71705 z" FillRule="NonZero"/>
+      </Path.Data>
+    </Path>
+    <!--Unknown tag: metadata-->
+    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path2397" Fill="#FFFF0000" StrokeThickness="69.2058" Stroke="#FFFF0000" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+      <Path.Data>
+        <PathGeometry Figures="m 269.24273 381.33314 h 193.7847" FillRule="NonZero"/>
+      </Path.Data>
+    </Path>
+    <Path xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="path2497" Fill="#FFFF0000" StrokeThickness="69.2058" Stroke="#FFFF0000" StrokeMiterLimit="4" StrokeLineJoin="Miter" StrokeStartLineCap="Round" StrokeEndLineCap="Round">
+      <Path.Data>
+        <PathGeometry Figures="M 366.13508 289.96736 V 472.69892" FillRule="NonZero"/>
+      </Path.Data>
+    </Path>
+  </Canvas>
+</Viewbox>

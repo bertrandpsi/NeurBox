@@ -1,5 +1,7 @@
 ﻿using ScottPlot.Plottable;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace NeuroBox
 {
@@ -107,25 +109,88 @@ return false;
 
         }
 
-        WeakReference[] weakReference = new WeakReference[] { null, null, null };
-        public void StartStop(object sender, RoutedEventArgs e)
+        public void Open(object sender, RoutedEventArgs e)
         {
-            if (worldGrid.SimulationRunning)
-            {
-                simulationSettings.SimulationIdle();
-                worldGrid.Stop();
-                statusSimultation.Text = "Status: Idle";
-                toolRun.Content = "Run";
+        }
 
-                while (worldGrid.SimulationRunning)
-                    System.Threading.Thread.Sleep(100);
+        public void Save(object sender, RoutedEventArgs e)
+        {
+        }
+
+        bool simultationStopped = true;
+        public void Stop(object sender, RoutedEventArgs e)
+        {
+            if (!worldGrid.SimulationRunning && simultationStopped)
+                return;
+
+            simulationSettings.SimulationIdle();
+            worldGrid.Stop();
+            statusSimultation.Text = "Status: Idle";
+
+            btnOpen.IsEnabled = true;
+            btnSave.IsEnabled = true;
+            btnSaveAs.IsEnabled = true;
+
+            btnRun.IsEnabled = true;
+            btnPause.IsEnabled = false;
+            btnStop.IsEnabled = false;
+            //toolRun.Content = "Run";
+
+            while (worldGrid.SimulationRunning)
+                System.Threading.Thread.Sleep(100);
+            simultationStopped = true;
+        }
+
+        public void Pause(object sender, RoutedEventArgs e)
+        {
+            if (!worldGrid.SimulationRunning)
+                return;
+
+            btnOpen.IsEnabled = true;
+            btnSave.IsEnabled = true;
+            btnSaveAs.IsEnabled = true;
+
+            worldGrid.Stop();
+            statusSimultation.Text = "Status: Paused";
+            btnRun.IsEnabled = true;
+            btnPause.IsEnabled = false;
+            btnStop.IsEnabled = true;
+
+            while (worldGrid.SimulationRunning)
+                System.Threading.Thread.Sleep(100);
+            simultationStopped = false;
+        }
+
+        WeakReference[] weakReference = new WeakReference[] { null, null, null };
+        public void Start(object sender, RoutedEventArgs e)
+        {
+            btnOpen.IsEnabled = false;
+            btnSave.IsEnabled = false;
+            btnSaveAs.IsEnabled = false;
+
+            btnRun.IsEnabled = false;
+            btnPause.IsEnabled = true;
+            btnStop.IsEnabled = true;
+            statusSimultation.Text = "Status: Running...";
+
+            if (simultationStopped == false)
+            {
+                worldGrid.Continue();
                 return;
             }
 
+            // In case the focus did not change
+            object focusObj = FocusManager.GetFocusedElement(this);
+            if (focusObj != null && focusObj is TextBox)
+            {
+                var binding = (focusObj as TextBox).GetBindingExpression(TextBox.TextProperty);
+                binding.UpdateSource();
+            }
+
+
             simulationSettings.SimulationRunning();
             mainTabControl.SelectedItem = simultationTab;
-            statusSimultation.Text = "Status: Running...";
-            toolRun.Content = "Stop";
+            //toolRun.Content = "Stop";
 
             worldGrid.SelectionFunction = null;
 

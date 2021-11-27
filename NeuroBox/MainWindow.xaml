@@ -9,17 +9,84 @@
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         ResizeMode="CanResizeWithGrip" Loaded="Window_Loaded"
         MinWidth="600" MinHeight="600" Icon="pack://application:,,,/icons/briefcase.png">
+    <Window.Resources>
+
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ToolBarPanel Grid.Row="0" >
-            <ToolBar ToolBarTray.IsLocked="True">
-                <Button Click="StartStop" x:Name="toolRun" Content="Run"/>
-            </ToolBar>
-        </ToolBarPanel>
+        <Border Grid.Row="0" Padding="5" Background="#FF9AB2D7">
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Width" Value="1" />
+                        <Setter Property="Height" Value="30" />
+                        <Setter Property="Margin" Value="10,0,10,0" />
+                        <Setter Property="Fill" Value="black" />
+                    </Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Height" Value="45"/>
+                        <Setter Property="Width" Value="45"/>
+                        <Setter Property="Margin" Value="2"/>
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Style.Resources>
+                            <Style TargetType="Border">
+                                <Setter Property="CornerRadius" Value="3" />
+                            </Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Orientation" Value="Vertical" />
+                                <Style.Resources>
+                                    <Style TargetType="Frame">
+                                        <Setter Property="Height" Value="20" />
+                                        <Setter Property="Width" Value="20" />
+                                    </Style>
+                                </Style.Resources>
+                            </Style>
+                        </Style.Resources>
+                    </Style>
+                </StackPanel.Resources>
+                <Button x:Name="btnOpen" Click="Open">
+                    <StackPanel>
+                        <Frame Source="/icons/open.xaml" />
+                        <Label Content="Open" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnSave" Click="Save">
+                    <StackPanel>
+                        <Frame Source="/icons/save.xaml" />
+                        <Label Content="Save" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnSaveAs" Click="Save">
+                    <StackPanel>
+                        <Frame Source="/icons/save_as.xaml" />
+                        <Label Content="As ..." />
+                    </StackPanel>
+                </Button>
+                <Rectangle />
+                <Button x:Name="btnRun" Click="Start">
+                    <StackPanel>
+                        <Frame Source="/icons/play.xaml" />
+                        <Label Content="Run" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnPause" IsEnabled="False" Click="Pause">
+                    <StackPanel>
+                        <Frame Source="/icons/pause.xaml" />
+                        <Label Content="Pause" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="btnStop" IsEnabled="False" Click="Stop">
+                    <StackPanel>
+                        <Frame Source="/icons/stop.xaml" />
+                        <Label Content="Stop" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
         <TabControl Grid.Row="1" x:Name="mainTabControl">
             <TabItem Header="Help">
                 <local:HelpContent />

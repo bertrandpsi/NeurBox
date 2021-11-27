@@ -44,7 +44,6 @@ namespace NeuroBox
 
         public void SimulationRunning()
         {
-            startButton.Content = "Stop";
             dnaCheckBox.IsEnabled = false;
             foreach (var t in parameterGrid.Children.OfType<TextBox>())
                 t.IsEnabled = false;
@@ -52,15 +51,9 @@ namespace NeuroBox
 
         public void SimulationIdle()
         {
-            startButton.Content = "Start";
             dnaCheckBox.IsEnabled = true;
             foreach (var t in parameterGrid.Children.OfType<TextBox>())
                 t.IsEnabled = true;
-        }
-
-        private void startButton_Click(object sender, RoutedEventArgs e)
-        {
-            MainWindow?.StartStop(sender, e);
         }
     }
 }
