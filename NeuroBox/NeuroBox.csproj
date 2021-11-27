@@ -5,7 +5,20 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>icons\briefcase_icon.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="icons\briefcase.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="icons\briefcase_icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="icons\briefcase.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
