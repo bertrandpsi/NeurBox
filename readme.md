@@ -13,7 +13,7 @@ parameters and conditions and see how the genetic algorithm reach a possible sol
 ![Network preview](/images/sim_2.png)
 
 # How to run it
-You can directly download the latest zip of the release, uncompress the zip and run the EXE directly from your
+You can directly [download the latest zip of the release](https://github.com/bertrandpsi/NeurBox/releases), uncompress the zip and run the EXE directly from your
 Windows installation. You don't need any additional software (no need to install .Net or anything else).
 
 # The neuronal network
