@@ -1,19 +1,25 @@
-﻿using ScottPlot.Plottable;
+﻿using Microsoft.Win32;
+using ScottPlot.Plottable;
+using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Xml.Serialization;
+using System.Xml.Xsl;
 
 namespace NeuroBox
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         System.Windows.Threading.DispatcherTimer dispatcherTimer;
 
         private ScatterPlotList signalPlot;
 
+        [NotifyParentProperty(true)]
         public string SelectionCondition { get; set; } = @"
 // You may re-use any of those code to change the selection or write your own
 
@@ -39,6 +45,7 @@ var b = 50 - critter.Y;
 var d=Math.Sqrt(b * b + a * a);
 return (d < 20);";
 
+        [NotifyParentProperty(true)]
         public string SpawnCoordinate { get; set; } = @"
 // You may re-use any of those code to change the selection or write your own
 
@@ -51,6 +58,7 @@ return (d < 20);";
 return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
 ";
 
+        [NotifyParentProperty(true)]
         public string WorldBlocking { get; set; } = @"
 // You may re-use any of those code to change the selection or write your own
 
@@ -111,10 +119,95 @@ return false;
 
         public void Open(object sender, RoutedEventArgs e)
         {
+            var dlg = new OpenFileDialog();
+            dlg.FileName = "Simulation";
+            dlg.DefaultExt = ".neuro";
+            dlg.Filter = "NeuroBox files (.neuro)|*.neuro";
+            if (dlg.ShowDialog() == true)
+            {
+                var fileName = dlg.FileName;
+
+
+                XmlSerializer ser = new XmlSerializer(typeof(SaveFile));
+                using (var file = File.OpenRead(fileName))
+                {
+                    var saveFile = (SaveFile)ser.Deserialize(file);
+
+                    simulationSettings.LifeSpan = saveFile.Parameters.LifeSpan;
+                    simulationSettings.InternalNeurons = saveFile.Parameters.InternalNeurons;
+                    simulationSettings.NetworkConnections = saveFile.Parameters.NetworkConnections;
+                    simulationSettings.GridSize = saveFile.Parameters.GridSize;
+                    simulationSettings.NumberCritter = saveFile.Parameters.NumberCritter;
+                    simulationSettings.MutationRate = saveFile.Parameters.MutationRate;
+                    simulationSettings.MinReproductionFactor = saveFile.Parameters.MinReproductionFactor;
+                    simulationSettings.DnaMixing = saveFile.Parameters.DnaMixing;
+                    SelectionCondition = saveFile.SelectionCondition;
+                    SpawnCoordinate = saveFile.SpawnCoordinate;
+                    WorldBlocking = saveFile.WorldBlocking;
+
+                    simulationSettings.Changed();
+                    Changed();
+                }
+            }
         }
 
+        string lastSaveFile = null;
         public void Save(object sender, RoutedEventArgs e)
         {
+            if (lastSaveFile == null)
+                SaveAs(sender, e);
+            else
+                SaveFile(lastSaveFile);
+        }
+
+        public void SaveAs(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog();
+            dlg.FileName = "Simulation";
+            dlg.DefaultExt = ".neuro";
+            dlg.Filter = "NeuroBox files (.neuro)|*.neuro";
+            if (dlg.ShowDialog() == true)
+            {
+                lastSaveFile= dlg.FileName;
+                var fileName = dlg.FileName;
+                SaveFile(fileName);
+            }
+        }
+
+        private void SaveFile(string fileName)
+        {
+            var saveFile = new SaveFile();
+            saveFile.Parameters.LifeSpan = simulationSettings.LifeSpan;
+            saveFile.Parameters.InternalNeurons = simulationSettings.InternalNeurons;
+            saveFile.Parameters.NetworkConnections = simulationSettings.NetworkConnections;
+            saveFile.Parameters.GridSize = simulationSettings.GridSize;
+            saveFile.Parameters.NumberCritter = simulationSettings.NumberCritter;
+            saveFile.Parameters.MutationRate = Math.Min(1, Math.Max(0, simulationSettings.MutationRate));
+            saveFile.Parameters.MinReproductionFactor = Math.Min(1, Math.Max(0, simulationSettings.MinReproductionFactor));
+            saveFile.Parameters.DnaMixing = simulationSettings.DnaMixing;
+            saveFile.SelectionCondition = SelectionCondition;
+            saveFile.SpawnCoordinate = SpawnCoordinate;
+            saveFile.WorldBlocking = WorldBlocking;
+
+            var xns = new XmlSerializerNamespaces();
+            xns.Add(string.Empty, string.Empty);
+            XmlSerializer ser = new XmlSerializer(typeof(SaveFile));
+            var settings = new System.Xml.XmlWriterSettings { Indent = true, NewLineOnAttributes = true, OmitXmlDeclaration = true };
+            using (var file = File.Create(fileName))
+            {
+                using (var writer = System.Xml.XmlWriter.Create(file, settings))
+                {
+                    ser.Serialize(writer, saveFile, xns);
+                }
+            }
+        }
+
+        public void Changed()
+        {
+            foreach (var prop in GetType()
+                .GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public)
+                .Where(p => p.GetCustomAttributes(typeof(NotifyParentPropertyAttribute), false).Any()))
+                PropertyChanged(this, new PropertyChangedEventArgs(prop.Name));
         }
 
         bool simultationStopped = true;
@@ -162,6 +255,9 @@ return false;
         }
 
         WeakReference[] weakReference = new WeakReference[] { null, null, null };
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public void Start(object sender, RoutedEventArgs e)
         {
             btnOpen.IsEnabled = false;

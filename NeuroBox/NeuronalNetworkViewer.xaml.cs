@@ -19,6 +19,8 @@ namespace NeuroBox
 
         internal void Render(List<WorldGrid.TopUsage> topMostUsed)
         {
+            if (topMostUsed.Count == 0)
+                return;
             networkPreview.Children.Clear();
             var pos = 0;
             foreach (var t in topMostUsed.Take(3).ToList())

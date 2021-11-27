@@ -30,6 +30,7 @@
                     <Setter Property="Fill" Value="White" />
                 </Style>
             </StackPanel.Resources>
+            <TextBlock Width="Auto" TextAlignment="Justify" Padding="10">This panel will show some diagram as soon as simulation data is available.</TextBlock>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

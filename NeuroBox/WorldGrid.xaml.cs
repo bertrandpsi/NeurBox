@@ -130,6 +130,8 @@ namespace NeuroBox
             CrittersDisplay.Clear();
         }
 
+        public List<string> DNAs => Critters.Select(row => row.DNA).ToList();
+
         internal void Stop()
         {
             SimulationMustRun = false;

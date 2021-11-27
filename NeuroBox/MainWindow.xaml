@@ -60,7 +60,7 @@
                         <Label Content="Save" />
                     </StackPanel>
                 </Button>
-                <Button x:Name="btnSaveAs" Click="Save">
+                <Button x:Name="btnSaveAs" Click="SaveAs">
                     <StackPanel>
                         <Frame Source="/icons/save_as.xaml" />
                         <Label Content="As ..." />
