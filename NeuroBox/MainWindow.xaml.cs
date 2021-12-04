@@ -21,6 +21,12 @@ namespace NeuroBox
 
         [NotifyParentProperty(true)]
         public string SelectionCondition { get; set; } = @"
+// You may have an init function called before selection
+// static void Init(IEnumerable<ICritter> critters)
+// {
+//    Do Some Magic;
+// }
+
 // You may re-use any of those code to change the selection or write your own
 
 // Use this to select only those which are on the 1/3 left part
@@ -47,6 +53,11 @@ return (d < 20);";
 
         [NotifyParentProperty(true)]
         public string SpawnCoordinate { get; set; } = @"
+// You may have an init function before spawning
+// static void Init()
+// {
+// }
+
 // You may re-use any of those code to change the selection or write your own
 
 // Random position within a circle of 20 starting at 20,20 
@@ -60,6 +71,11 @@ return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
 
         [NotifyParentProperty(true)]
         public string WorldBlocking { get; set; } = @"
+// You may have an init function before the world generation
+// static void Init()
+// {
+// }
+
 // You may re-use any of those code to change the selection or write your own
 
 // Place some random blocks
@@ -71,6 +87,9 @@ return (rnd.Next(worldGrid.GridSize-1),rnd.Next(worldGrid.GridSize-1));
 // All empty
 return false;
 ";
+
+        [NotifyParentProperty(true)]
+        public string LibClasses { get; set; } = @"// You may add your own class code which will be loaded";
 
         public WorldGrid WorldGrid => worldGrid;
 
@@ -133,6 +152,7 @@ return false;
                 {
                     var saveFile = (SaveFile)ser.Deserialize(file);
 
+                    simulationSettings.Description = saveFile.Description;
                     simulationSettings.LifeSpan = saveFile.Parameters.LifeSpan;
                     simulationSettings.InternalNeurons = saveFile.Parameters.InternalNeurons;
                     simulationSettings.NetworkConnections = saveFile.Parameters.NetworkConnections;
@@ -144,9 +164,15 @@ return false;
                     SelectionCondition = saveFile.SelectionCondition;
                     SpawnCoordinate = saveFile.SpawnCoordinate;
                     WorldBlocking = saveFile.WorldBlocking;
+                    LibClasses = saveFile.LibClasses;
 
                     simulationSettings.Changed();
                     Changed();
+
+                    if (!string.IsNullOrWhiteSpace(simulationSettings.Description))
+                    {
+                        MessageBox.Show(simulationSettings.Description, "Description");
+                    }
                 }
             }
         }
@@ -168,7 +194,7 @@ return false;
             dlg.Filter = "NeuroBox files (.neuro)|*.neuro";
             if (dlg.ShowDialog() == true)
             {
-                lastSaveFile= dlg.FileName;
+                lastSaveFile = dlg.FileName;
                 var fileName = dlg.FileName;
                 SaveFile(fileName);
             }
@@ -177,6 +203,7 @@ return false;
         private void SaveFile(string fileName)
         {
             var saveFile = new SaveFile();
+            saveFile.Description = simulationSettings.Description;
             saveFile.Parameters.LifeSpan = simulationSettings.LifeSpan;
             saveFile.Parameters.InternalNeurons = simulationSettings.InternalNeurons;
             saveFile.Parameters.NetworkConnections = simulationSettings.NetworkConnections;
@@ -188,6 +215,7 @@ return false;
             saveFile.SelectionCondition = SelectionCondition;
             saveFile.SpawnCoordinate = SpawnCoordinate;
             saveFile.WorldBlocking = WorldBlocking;
+            saveFile.LibClasses = LibClasses;
 
             var xns = new XmlSerializerNamespaces();
             xns.Add(string.Empty, string.Empty);
@@ -301,43 +329,36 @@ return false;
 
             try
             {
-                weakReference[0] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System;public static class EvalClass{ public static bool EvalFunction(Critter critter){" + SelectionCondition + "}}");
+                weakReference[0] = CSParsing.LoadAndExecute("using NeuroBox;using System.Linq; using System.Collections.Generic; using NeuroBox.NeuronalNet;using System;public static class SurviveEvalClass{ public static bool EvalFunction(ICritter critter){" + SelectionCondition + "}} public static class EvalSpawnClass { public static (int,int) EvalFunction(Random rnd, WorldGrid worldGrid) {" + SpawnCoordinate + "}} public static class EvalBlockingClass { public static bool EvalFunction(int x, int y, Random rnd) {" + WorldBlocking + "}} " + LibClasses);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Error in the Selection Condition code");
+                MessageBox.Show(ex.Message, "Error in the script code");
                 return;
             }
 
             var assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[0].Target).Assemblies.First();
-            var method1 = assembly.GetType("EvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var method1 = assembly.GetType("SurviveEvalClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             worldGrid.SelectionFunction = (critter) => !(bool)method1.Invoke(null, new object[] { critter });
 
-            try
-            {
-                weakReference[1] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System; public static class EvalSpawnClass { public static (int,int) EvalFunction(Random rnd, WorldGrid worldGrid) {" + SpawnCoordinate + "}}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error in the Spawn code");
-                return;
-            }
+            var initSurvivalMethod = assembly.GetType("SurviveEvalClass").GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).FirstOrDefault(m => m.Name.Contains("_Init|"));
+            if (initSurvivalMethod == null)
+                worldGrid.InitSelection = null;
+            else
+                worldGrid.InitSelection = (critters) => { initSurvivalMethod.Invoke(null, new object[] { critters }); };
 
-            assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[1].Target).Assemblies.First();
             var method2 = assembly.GetType("EvalSpawnClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             worldGrid.SpawnCoordinateFunction = (worldGrid) => ((int, int))method2.Invoke(null, new object[] { WorldGrid.Random, worldGrid });
+            var initSpawnMethod = assembly.GetType("EvalSpawnClass").GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).FirstOrDefault(m => m.Name.Contains("_Init|"));
+            if (initSpawnMethod == null)
+                worldGrid.InitSpawn = null;
+            else
+                worldGrid.InitSpawn = () => { initSpawnMethod.Invoke(null, null); };
 
-            try
-            {
-                weakReference[2] = CSParsing.LoadAndExecute("using NeuroBox;using NeuroBox.NeuronalNet;using System; public static class EvalBlockingClass { public static bool EvalFunction(int x, int y, Random rnd) {" + WorldBlocking + "}}");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Error in the Spawn code");
-                return;
-            }
+            var initBlockingMethod = assembly.GetType("EvalBlockingClass").GetMethods(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic).FirstOrDefault(m => m.Name.Contains("_Init|"));
+            if (initBlockingMethod != null)
+                initBlockingMethod.Invoke(null, null);
 
-            assembly = ((CSParsing.SimpleUnloadableAssemblyLoadContext)weakReference[2].Target).Assemblies.First();
             var method3 = assembly.GetType("EvalBlockingClass").GetMethod("EvalFunction", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             worldGrid.WorldBlockingFunction = (x, y, rnd) => (bool)method3.Invoke(null, new object[] { x, y, rnd });
 

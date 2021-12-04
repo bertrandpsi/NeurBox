@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace NeuroBox.NeuronalNet
 {
-    public class Critter
+    public class Critter : ICritter
     {
         static SemaphoreSlim gridMovement = new SemaphoreSlim(1);
 

@@ -78,14 +78,17 @@ namespace NeuroBox
             {
                 for (int y = 0; y < GridSize; y += 2)
                 {
-                    critter.X = x;
-                    critter.Y = y;
-                    if (!SelectionFunction(critter))
+                    if (InitSelection == null)
                     {
-                        var r = new Rectangle { Width = 8.5, Height = 8.5, Fill = fill };
-                        r.SetValue(Canvas.LeftProperty, x * 4.0);
-                        r.SetValue(Canvas.TopProperty, y * 4.0);
-                        worldCanvas.Children.Add(r);
+                        critter.X = x;
+                        critter.Y = y;
+                        if (!SelectionFunction(critter))
+                        {
+                            var r = new Rectangle { Width = 8.5, Height = 8.5, Fill = fill };
+                            r.SetValue(Canvas.LeftProperty, x * 4.0);
+                            r.SetValue(Canvas.TopProperty, y * 4.0);
+                            worldCanvas.Children.Add(r);
+                        }
                     }
                     if (WorldBlockingFunction(x, y, Random))
                     {
@@ -132,17 +135,23 @@ namespace NeuroBox
 
         public List<string> DNAs => Critters.Select(row => row.DNA).ToList();
 
+        public Action<IEnumerable<ICritter>> InitSelection { get; internal set; }
+        public Action InitSpawn { get; internal set; }
+
         internal void Stop()
         {
             SimulationMustRun = false;
             while (simulationRunner != null)
                 Thread.Sleep(100);
             TimeWatch.Stop();
+            timeSinceLastFrame.Stop();
             dispatcherTimer.Stop();
         }
 
         internal void Spawn()
         {
+            if(InitSpawn != null)
+                InitSpawn();
             // Generate some random Critter
             Critters.AddRange(Enumerable.Range(0, NumberCritter - Critters.Count).Select(cId => new Critter
             {
@@ -161,7 +170,7 @@ namespace NeuroBox
                     var coord = SpawnCoordinateFunction(this);
                     c.X = coord.Item1;
                     c.Y = coord.Item2;
-                } while (Grid[c.X, c.Y] != -1);
+                } while (c.X < 0 || c.Y < 0 || c.X >= GridSize - 1 || c.Y >= GridSize - 1 || Grid[c.X, c.Y] != -1);
                 Grid[c.X, c.Y] = 1;
                 c.Build();
             });
@@ -181,16 +190,19 @@ namespace NeuroBox
             });
         }
 
-        private void ReuseCritterDisplay()
+        private void ReuseCritterDisplay(bool mustRepaint)
         {
             for (var i = 0; i < Critters.Count; i++)
             {
                 var c = Critters[i];
                 var d = CrittersDisplay[i];
                 d.Critter = c;
-                d.CalculateColor();
-                d.SetValue(Canvas.LeftProperty, (double)c.X * 4);
-                d.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                if (mustRepaint)
+                {
+                    d.CalculateColor();
+                    d.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                    d.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                }
             }
         }
 
@@ -251,15 +263,15 @@ namespace NeuroBox
                     NextGeneration();
                     return;
                 }
-            }
 
-            lock (Critters)
-            {
-                CrittersDisplay.ForEach(c =>
+                lock (Critters)
                 {
-                    c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
-                    c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
-                });
+                    CrittersDisplay.ForEach(c =>
+                    {
+                        c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                        c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                    });
+                }
             }
         }
 
@@ -340,16 +352,23 @@ namespace NeuroBox
             Generation++;
             TimePerGeneration = TimeWatch.Elapsed / Generation;
 
-            CrittersDisplay.ForEach(c =>
+            var mustRepaint = false;
+            if (timeSinceLastFrame.Elapsed > TimeSpan.FromMilliseconds(100))
             {
-                c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
-                c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
-            });
+                timeSinceLastFrame.Restart();
+                CrittersDisplay.ForEach(c =>
+                {
+                    c.SetValue(Canvas.LeftProperty, (double)c.X * 4);
+                    c.SetValue(Canvas.TopProperty, (double)c.Y * 4);
+                });
+            }
 
             CalculatingSimilarities(Critters.ToList());
 
             Task.Run(() =>
             {
+                if(InitSelection != null)
+                    InitSelection(Critters);
                 var dnas = SelectionCriteria();
 
                 Reset();
@@ -374,7 +393,10 @@ namespace NeuroBox
             {
                 try
                 {
-                    Dispatcher.Invoke(ReuseCritterDisplay);
+                    if (mustRepaint)
+                        Dispatcher.Invoke(() => ReuseCritterDisplay(mustRepaint));
+                    else
+                        ReuseCritterDisplay(false);
 
                     simulationRunner = new Thread(SimulationThread);
                     simulationRunner.IsBackground = true;
@@ -399,6 +421,7 @@ namespace NeuroBox
             return dnas;
         }
 
+        Stopwatch timeSinceLastFrame = new Stopwatch();
         internal void Start()
         {
             while (simulationRunner != null)
@@ -417,6 +440,8 @@ namespace NeuroBox
             TimeWatch = new Stopwatch();
             TimeWatch.Start();
 
+            timeSinceLastFrame.Start();
+
             simulationRunner = new Thread(SimulationThread);
             simulationRunner.IsBackground = true;
             simulationRunner.Start();
@@ -425,6 +450,8 @@ namespace NeuroBox
 
         internal void Continue()
         {
+            timeSinceLastFrame.Restart();
+
             SimulationMustRun = true;
             TimeWatch.Start();
             simulationRunner = new Thread(SimulationThread);

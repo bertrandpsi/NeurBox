@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              DataContext="{Binding RelativeSource={RelativeSource Self}}"             
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="400">
     <ScrollViewer>
         <Grid x:Name="parameterGrid">
             <Grid.Resources>
@@ -44,46 +44,50 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Label Grid.Row="0" Grid.Column="0">Grid Size:</Label>
             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding GridSize}" />
 
-            <Label Grid.Row="1" Grid.Column="0">Critter Spawn:</Label>
-            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NumberCritter}" />
+            <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Top">Description:</Label>
+            <TextBox Grid.Row="1" Grid.Column="1" x:Name="description" Text="{Binding Description}" TextWrapping="WrapWithOverflow"  Height="100" VerticalScrollBarVisibility="Visible" />
 
-            <Label Grid.Row="2" Grid.Column="0">Neuron Connections:</Label>
-            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NetworkConnections}" />
+            <Label Grid.Row="2" Grid.Column="0">Critter Spawn:</Label>
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding NumberCritter}" />
 
-            <Label Grid.Row="3" Grid.Column="0">Internal Neurons:</Label>
-            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding InternalNeurons}" />
+            <Label Grid.Row="3" Grid.Column="0">Neuron Connections:</Label>
+            <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding NetworkConnections}" />
 
-            <Label Grid.Row="4" Grid.Column="0">Life Span:</Label>
-            <TextBox Grid.Row="4" Grid.Column="1"  Text="{Binding LifeSpan}"  />
+            <Label Grid.Row="4" Grid.Column="0">Internal Neurons:</Label>
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding InternalNeurons}" />
 
-            <Label Grid.Row="5" Grid.Column="0">DNA Mixing:</Label>
-            <CheckBox Grid.Row="5" Grid.Column="1" x:Name="dnaCheckBox" IsChecked="{Binding DnaMixing}"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" />
+            <Label Grid.Row="5" Grid.Column="0">Life Span:</Label>
+            <TextBox Grid.Row="5" Grid.Column="1"  Text="{Binding LifeSpan}"  />
 
-            <Label Grid.Row="6" Grid.Column="0">Mutation Rate:</Label>
-            <TextBox Grid.Row="6" Grid.Column="1"  Text="{Binding MutationRate}"  />
+            <Label Grid.Row="6" Grid.Column="0">DNA Mixing:</Label>
+            <CheckBox Grid.Row="6" Grid.Column="1" x:Name="dnaCheckBox" IsChecked="{Binding DnaMixing}"  HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" />
 
-            <Label Grid.Row="7" Grid.Column="0">Min Reproduction Factor:</Label>
-            <TextBox Grid.Row="7" Grid.Column="1"  Text="{Binding MinReproductionFactor}"  />
+            <Label Grid.Row="7" Grid.Column="0">Mutation Rate:</Label>
+            <TextBox Grid.Row="7" Grid.Column="1"  Text="{Binding MutationRate}"  />
 
-            <Label Grid.Row="8" Grid.Column="0">Realtime:</Label>
-            <CheckBox Grid.Row="8" Grid.Column="1" IsChecked="{Binding InRealTime}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"  />
+            <Label Grid.Row="8" Grid.Column="0">Min Reproduction Factor:</Label>
+            <TextBox Grid.Row="8" Grid.Column="1"  Text="{Binding MinReproductionFactor}"  />
 
-            <Label Grid.Row="9" Grid.Column="0">Generation:</Label>
-            <TextBlock Grid.Row="9" Grid.Column="1" x:Name="generation"  />
+            <Label Grid.Row="9" Grid.Column="0">Realtime:</Label>
+            <CheckBox Grid.Row="9" Grid.Column="1" IsChecked="{Binding InRealTime}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0"  />
 
-            <Label Grid.Row="10" Grid.Column="0">Survival Rate:</Label>
-            <TextBlock Grid.Row="10" Grid.Column="1" x:Name="survival"  />
+            <Label Grid.Row="10" Grid.Column="0">Generation:</Label>
+            <TextBlock Grid.Row="10" Grid.Column="1" x:Name="generation"  />
 
-            <Label Grid.Row="11" Grid.Column="0">Time Per Generation:</Label>
-            <TextBlock Grid.Row="11" Grid.Column="1" x:Name="timePerGeneration"  />
+            <Label Grid.Row="11" Grid.Column="0">Survival Rate:</Label>
+            <TextBlock Grid.Row="11" Grid.Column="1" x:Name="survival"  />
 
-            <Label Grid.Row="12" Grid.Column="0">Genetic Similarities:</Label>
-            <TextBlock Grid.Row="12" Grid.Column="1" x:Name="geneticSimilarities"  />
+            <Label Grid.Row="12" Grid.Column="0">Time Per Generation:</Label>
+            <TextBlock Grid.Row="12" Grid.Column="1" x:Name="timePerGeneration"  />
+
+            <Label Grid.Row="13" Grid.Column="0">Genetic Similarities:</Label>
+            <TextBlock Grid.Row="13" Grid.Column="1" x:Name="geneticSimilarities"  />
         </Grid>
     </ScrollViewer>
 </UserControl>

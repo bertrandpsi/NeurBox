@@ -33,11 +33,13 @@ namespace NeuroBox
     {
         [XmlAnyElement("FileInformation")]
         public XmlComment VersionComment { get { return new XmlDocument().CreateComment("This file contains the simultaion settings for NeuroBox."); } set { } }
+        public string Description { get; set; }
 
         public SimultationParameters Parameters { get; set; } = new SimultationParameters();
 
         public string SelectionCondition { get; set; }
         public string SpawnCoordinate { get; set; }
         public string WorldBlocking { get; set; }
+        public string LibClasses { get; set; }
     }
 }

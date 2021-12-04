@@ -1,0 +1,185 @@
+﻿<Simulation>
+  <!--This file contains the simultaion settings for NeuroBox.-->
+  <Description>Try to solve a labyrinth</Description>
+  <Parameters
+    LifeSpan="3000"
+    InternalNeurons="10"
+    NetworkConnections="30"
+    GridSize="100"
+    NumberCritter="50"
+    MutationRate="0.01"
+    MinReproductionFactor="0.5"
+    DnaMixing="true" />
+  <SelectionCondition>static void Init(IEnumerable&lt;ICritter&gt; critters)
+{
+    AStar.CalculateCritterDistance(critters);
+}
+
+return AStar.ShouldKeep(critter);
+</SelectionCondition>
+  <SpawnCoordinate>// Random position within a circle of 20 starting at 20,20 
+var r = 20 * Math.Sqrt(rnd.NextDouble());
+var theta = rnd.NextDouble() * 2.0 * Math.PI;
+return ((int)(r * Math.Cos(theta)),(int)(r * Math.Sin(theta)));
+</SpawnCoordinate>
+  <WorldBlocking>static void Init()
+{
+    Maze.Init();
+    for (var x = 24; x &gt; 0; x--)
+    {
+        for (var y = 24; y &gt; 0; y--)
+        {
+            if (Maze.MazeData[x, y] == true)
+            {
+                AStar.GoalX = x * 4;
+                AStar.GoalY = y * 4;
+                break;
+            }
+        }
+    }
+}
+
+return !Maze.MazeData[x/4,y/4];
+</WorldBlocking>
+  <LibClasses>    static class AStar
+    {
+        class CritterWithDistance
+        {
+            public ICritter Critter { get; set; }
+            public int Distance { get; set; }
+        }
+
+        public static int GoalX { get; set; }
+        public static int GoalY { get; set; }
+        public static int GridSize { get; set; } = 100;
+
+        static List&lt;CritterWithDistance&gt; CalculatedCritters;
+
+        public static void CalculateCritterDistance(IEnumerable&lt;ICritter&gt; critters)
+        {
+            CalculatedCritters = critters.Select(critter =&gt; new CritterWithDistance { Critter = critter, Distance = SolvePath(critter.X / 4, critter.Y / 4, GoalX / 4, GoalY / 4, GridSize)?.Count ?? -1 }).OrderBy(row =&gt; row.Distance).Take(10).ToList();
+        }
+
+        public static bool ShouldKeep(ICritter critter)
+        {
+            return CalculatedCritters.Any(row =&gt; row.Critter == critter);
+        }
+
+        const int maxSteps = 10000;
+        private static List&lt;(int X, int Y)&gt; SolvePath(int startX, int startY, int goalX, int goalY, int gridSize)
+        {
+            if (startX == goalX &amp;&amp; startY == goalY)
+                return new List&lt;(int X, int Y)&gt; { (startX, startY) };
+
+            var toDo = new Queue&lt;(int X, int Y, List&lt;(int X, int Y)&gt; Steps)&gt;();
+            var visited = new List&lt;(int X, int Y)&gt;();
+
+            toDo.Enqueue((X: startX, Y: startY, Steps: new List&lt;(int X, int Y)&gt; { (startX, startY) }));
+            visited.Add((startX, startY));
+            while (toDo.Count &gt; 0)
+            {
+                var step = toDo.Dequeue();
+                if (step.X == goalX &amp;&amp; step.Y == goalY)
+                {
+                    return step.Steps;
+                }
+                var toCheck = new List&lt;(int X, int Y)&gt; { (step.X - 1, step.Y), (step.X + 1, step.Y), (step.X, step.Y - 1), (step.X, step.Y + 1) };
+                foreach (var t in toCheck)
+                {
+                    if (!(t.X &gt;= 0 &amp;&amp; t.X &lt; gridSize &amp;&amp; t.Y &gt;= 0 &amp;&amp; t.Y &lt; gridSize))
+                        continue;
+                    if (visited.Any(v =&gt; v.X == t.X &amp;&amp; v.Y == t.Y))
+                        continue;
+                    if (!Maze.MazeData[t.X, t.Y])
+                        continue;
+                    var newRoad = step.Steps.ToList();
+                    newRoad.Add(t);
+                    toDo.Enqueue((X: t.X, Y: t.Y, Steps: newRoad));
+                    visited.Add(t);
+                }
+            }
+            return null;
+        }
+    }
+
+    internal static class Maze
+    {
+        public static bool[,] MazeData;
+
+        public static void Init()
+        {
+            MazeData = CreateBaseMaze(25, 25);
+        }
+
+        static bool[,] CreateBaseMaze(int w, int h, int cx = 0, int cy = 0)
+        {
+            var map = new bool[w, h];
+            var rnd = new Random();
+
+            var visited = new bool[w * h];
+            for (int i = 0; i &lt; w; i++)
+            {
+                for (var j = 0; j &lt; h; j++)
+                {
+                    map[i, j] = false;
+                    visited[i + j * w] = false;
+                }
+            }
+
+            var offX = 1 - (cx % 2);
+            var offY = 1 - (cy % 2);
+
+            // Fill all
+            for (var i = 0; i &lt; w - offX; i++)
+            {
+                for (var j = 0; j &lt; h - offY; j++)
+                {
+                    if (i % 2 == 1 &amp;&amp; j % 2 == 1 &amp;&amp; i &lt; w - (1 + offX) &amp;&amp; j &lt; h - (1 + offY))
+                        map[i + offX, j + offY] = true;
+                    else
+                        map[i + offX, j + offY] = false;
+                }
+            }
+
+            var todo = new List&lt;(int X, int Y)&gt; { (1 + offX, 1 + offY) };
+
+            visited[todo[0].X + todo[0].Y * w] = true;
+            var maxSteps = w * h / 3;
+
+            while (todo.Count &gt; 0 &amp;&amp; maxSteps &gt; 0)
+            {
+                maxSteps--;
+                var s = rnd.Next(todo.Count);
+                var c = todo[s];
+                todo.RemoveAt(s);
+
+                if (c.X &gt; 1 + offX &amp;&amp; visited[(c.X - 2) + c.Y * w] == false)
+                {
+                    todo.Add((c.X - 2, c.Y));
+                    visited[(c.X - 2) + c.Y * w] = true;
+                    map[(c.X) - 1, c.Y] = true;
+                }
+                if (c.Y &gt; 1 + offY &amp;&amp; visited[(c.X) + (c.Y - 2) * w] == false)
+                {
+                    todo.Add((c.X, c.Y - 2));
+                    visited[(c.X) + (c.Y - 2) * w] = true;
+                    map[c.X, (c.Y) - 1] = true;
+                }
+                if (c.X + 2 &lt; w - 1 &amp;&amp; visited[(c.X + 2) + c.Y * w] == false)
+                {
+                    todo.Add((c.X + 2, c.Y));
+                    visited[(c.X + 2) + c.Y * w] = true;
+                    map[(c.X) + 1, c.Y] = true;
+                }
+                if (c.Y + 2 &lt; h - 1 &amp;&amp; visited[(c.X) + (c.Y + 2) * w] == false)
+                {
+                    todo.Add((c.X, c.Y + 2));
+                    visited[(c.X) + (c.Y + 2) * w] = true;
+                    map[c.X, (c.Y) + 1] = true;
+                }
+            }
+
+            return map;
+        }
+    }</LibClasses>
+</Simulation>

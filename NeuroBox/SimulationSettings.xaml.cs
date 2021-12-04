@@ -10,6 +10,8 @@ namespace NeuroBox
     public partial class SimulationSettings : UserControl, INotifyPropertyChanged
     {
         [NotifyParentProperty(true)]
+        public string Description { get; set; } = "Your project description. Replace this text before saving";
+        [NotifyParentProperty(true)]
         public int InternalNeurons { get; set; } = 2;
         [NotifyParentProperty(true)]
         public int NetworkConnections { get; set; } = 6;

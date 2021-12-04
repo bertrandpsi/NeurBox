@@ -41,7 +41,8 @@ namespace NeuroBox
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"NeuroBox.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Core.dll"),
-                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Runtime.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Linq.dll"),
+                    MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Collections.dll"),
                     MetadataReference.CreateFromFile(System.AppContext.BaseDirectory+"System.Private.CoreLib.dll"),
                 };
             }
@@ -53,6 +54,8 @@ namespace NeuroBox
                     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.GetExecutingAssembly().Location),
                     MetadataReference.CreateFromFile(typeof(Math).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(CollectionExtensions).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Random).Assembly.Location),
                 };
             }

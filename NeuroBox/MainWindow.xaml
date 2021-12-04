@@ -144,6 +144,10 @@
                         <TextBlock>The following function must returns True if the coordinate must be blocked.</TextBlock>
                         <Label>Block Placing Function:</Label>
                         <TextBox Text="{Binding WorldBlocking}"/>
+
+                        <TextBlock>The code is used as additional classes if needed.</TextBlock>
+                        <Label>Library Classes:</Label>
+                        <TextBox Text="{Binding LibClasses}"/>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
